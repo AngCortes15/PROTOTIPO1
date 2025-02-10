@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Evento - Tantuyo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
+    <style>
+        .main-container {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+        }
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="form-container">
+            <h2 class="text-center mb-4">Crear Nuevo Evento</h2>
+            
+            <div id="alertMessage" class="alert d-none"></div>
+
+            <form id="eventoForm" class="needs-validation" novalidate>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Encargado</label>
+                        <input type="text" id="encargadoNombre" class="form-control" readonly>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">ID Encargado</label>
+                        <input type="text" id="encargadoId" class="form-control" readonly>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Fecha</label>
+                        <input type="date" id="fecha" class="form-control" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Hora Inicio</label>
+                        <input type="time" id="horaInicio" class="form-control" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Hora Fin</label>
+                        <input type="time" id="horaFin" class="form-control" required>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Zona</label>
+                    <select id="zona" class="form-select" required>
+                        <option value="">Selecciona una zona</option>
+                        <option value="Terraza">Terraza</option>
+                        <option value="Mesa de Billar">Mesa de Billar</option>
+                        <option value="Podcast">Podcast</option>
+                        <option value="Foro">Foro</option>
+                        <option value="Multimedia">Multimedia</option>
+                        <option value="Tantuyo Lab">Tantuyo Lab</option>
+                        <option value="Taller Multiusos">Taller Multiusos</option>
+                        <option value="Cuarto Oscuro">Cuarto Oscuro</option>
+                    </select>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary">Crear Evento</button>
+                    <a href="dashboard.html" class="btn btn-outline-secondary">Volver</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        
+        function showAlert(message, type) {
+            const alertDiv = document.getElementById('alertMessage');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            alertDiv.classList.remove('d-none');
+            setTimeout(() => alertDiv.classList.add('d-none'), 5000);
+        }
+
+        async function cargarDatosEncargado() {
+            const userId = localStorage.getItem('userId');
+            if (!userId) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/users/${userId}`);
+                const usuario = await response.json();
+                document.getElementById('encargadoNombre').value = `${usuario.nombres} ${usuario.apellidos}`;
+                document.getElementById('encargadoId').value = usuario.id;
+            } catch (error) {
+                showAlert('Error al cargar datos del encargado', 'danger');
+            }
+        }
+
+        document.getElementById('eventoForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+
+            if (!form.checkValidity()) {
+                e.stopPropagation();
+                form.classList.add('was-validated');
+                return;
+            }
+
+            const eventoData = {
+                encargadoId: document.getElementById('encargadoId').value,
+                encargadoNombre: document.getElementById('encargadoNombre').value,
+                fecha: document.getElementById('fecha').value,
+                horaInicio: document.getElementById('horaInicio').value,
+                horaFin: document.getElementById('horaFin').value,
+                zona: document.getElementById('zona').value,
+                fechaCreacion: new Date().toISOString()
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/eventos`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(eventoData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showAlert(`Evento creado exitosamente. ID del evento: ${data.id}`, 'success');
+                    form.reset();
+                    setTimeout(() => window.location.href = 'dashboard.html', 3000);
+                } else {
+                    showAlert(data.mensaje || 'Error al crear el evento', 'danger');
+                }
+            } catch (error) {
+                showAlert('Error al conectar con el servidor', 'danger');
+            }
+        });
+
+        // Cargar datos del encargado al iniciar
+        cargarDatosEncargado();
+    </script>
+</body>
+</html>

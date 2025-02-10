@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRUD con Carga de Catálogo JSON</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .json-upload {
+            background-color: #f5f5f5;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        input {
+            padding: 8px;
+            margin-right: 10px;
+        }
+        button {
+            padding: 8px 15px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .item {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 4px;
+        }
+        .message {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+        .error-message {
+            background-color: #fee;
+            color: #dc3545;
+            border: 1px solid #dc3545;
+        }
+        .success-message {
+            background-color: #efe;
+            color: #28a745;
+            border: 1px solid #28a745;
+        }
+        #jsonInput {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Gestión de Productos</h1>
+    
+    <!-- Mensajes de estado -->
+    <div id="errorMessage" class="message error-message"></div>
+    <div id="successMessage" class="message success-message"></div>
+
+    <div class="json-upload">
+        <h3>Cargar Catálogo</h3>
+        <input type="file" id="jsonInput" accept=".json">
+        <button onclick="cargarCatalogo()">Cargar Catálogo</button>
+    </div>
+
+    <h3>Productos en Catálogo</h3>
+    <div id="itemsList"></div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api/items';
+        let editingId = null;
+
+        // Función para mostrar mensajes
+        function showMessage(message, type) {
+            const errorDiv = document.getElementById('errorMessage');
+            const successDiv = document.getElementById('successMessage');
+
+            // Ocultar ambos mensajes primero
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+
+            if (type === 'error') {
+                errorDiv.textContent = message;
+                errorDiv.style.display = 'block';
+            } else {
+                successDiv.textContent = message;
+                successDiv.style.display = 'block';
+            }
+
+            // Ocultar después de 5 segundos
+            setTimeout(() => {
+                if (type === 'error') {
+                    errorDiv.style.display = 'none';
+                } else {
+                    successDiv.style.display = 'none';
+                }
+            }, 5000);
+        }
+
+        // Función para cargar catálogo desde JSON
+        async function cargarCatalogo() {
+            const fileInput = document.getElementById('jsonInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showMessage('Por favor selecciona un archivo JSON', 'error');
+                return;
+            }
+
+            try {
+                const reader = new FileReader();
+                
+                reader.onload = async function(e) {
+                    try {
+                        const productos = JSON.parse(e.target.result);
+
+                        if (!Array.isArray(productos)) {
+                            throw new Error('El archivo debe contener un array de productos');
+                        }
+
+                        // Validar cada producto
+                        productos.forEach((producto, index) => {
+                            if (!producto.nombre || !producto.precio) {
+                                throw new Error(`Producto ${index + 1}: debe tener nombre y precio`);
+                            }
+                        });
+
+                        // Cargar productos al servidor
+                        let productosAgregados = 0;
+                        for (const producto of productos) {
+                            try {
+                                const response = await fetch(API_URL, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify(productos)
+                                });
+                                
+                                if (response.ok) {
+                                    productosAgregados++;
+                                }
+                            } catch (error) {
+                                console.error('Error al agregar producto:', error);
+                            }
+                        }
+
+                        showMessage(`Se cargaron ${productosAgregados} productos exitosamente`, 'success');
+                        loadItems();
+                        fileInput.value = '';
+                    } catch (error) {
+                        showMessage(`Error al procesar el archivo: ${error.message}`, 'error');
+                    }
+                };
+
+                reader.onerror = function() {
+                    showMessage('Error al leer el archivo', 'error');
+                };
+
+                reader.readAsText(file);
+            } catch (error) {
+                showMessage(`Error al procesar el archivo: ${error.message}`, 'error');
+            }
+        }
+
+        async function loadItems() {
+            try {
+                const response = await fetch(API_URL);
+                const items = await response.json();
+                displayItems(items);
+            } catch (error) {
+                showMessage('Error al cargar los items', 'error');
+            }
+        }
+
+        function displayItems(items) {
+            const itemsList = document.getElementById('itemsList');
+            itemsList.innerHTML = '';
+            
+            items.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'item';
+                itemDiv.innerHTML = `
+                    <div>
+                        <strong>${item.nombre}</strong> - $${item.precio}
+                    </div>
+                    <div>
+                        <button>Agregar</button>
+                        
+                    </div>
+                `;
+                itemsList.appendChild(itemDiv);
+            });
+        }
+
+        function resetForm() {
+            document.getElementById('itemForm').reset();
+            editingId = null;
+        }
+
+        // Cargar items al iniciar
+        loadItems();
+    </script>
+</body>
+</html>
