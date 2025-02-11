@@ -497,6 +497,32 @@ app.get('/api/eventos/encargado/:encargadoId', async (req, res) => {
     }
 });
 
+// GET - Obtener un evento por ID
+app.get('/api/eventos/:id', async (req, res) => {
+    try {
+        const params = {
+            TableName: TABLE_EVENTOS,
+            Key: {
+                id: req.params.id
+            }
+        };
+
+        const result = await dynamoDB.get(params).promise();
+        
+        if (!result.Item) {
+            return res.status(404).json({ mensaje: 'Evento no encontrado' });
+        }
+
+        res.json(result.Item);
+    } catch (error) {
+        console.error('Error al obtener evento:', error);
+        res.status(500).json({ 
+            mensaje: 'Error al obtener evento', 
+            error: error.message 
+        });
+    }
+});
+
 
 const PORT = process.env.PORT
 async function verificarConexionDynamoDB() {
