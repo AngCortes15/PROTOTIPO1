@@ -1,213 +1,237 @@
 <!DOCTYPE html>
 <html lang="es">
-
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Unirse a Evento</title>
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
     <!-- Custom CSS -->
     <style>
-        body {
-            background-color: #f8f9fa;
-        }
+      body {
+        background-color: #f8f9fa;
+      }
 
-        .custom-card {
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            background-color: white;
-        }
+      .custom-card {
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        background-color: white;
+      }
 
-        .primary-color {
-            color: #6c63ff;
-        }
+      .primary-color {
+        color: #6c63ff;
+      }
 
-        .custom-btn {
-            background-color: #6c63ff;
-            border-color: #6c63ff;
-            padding: 10px 30px;
-            border-radius: 25px;
-        }
+      .custom-btn {
+        background-color: #6c63ff;
+        border-color: #6c63ff;
+        padding: 10px 30px;
+        border-radius: 25px;
+      }
 
-        .custom-btn:hover {
-            background-color: #5a52d5;
-            border-color: #5a52d5;
-        }
+      .custom-btn:hover {
+        background-color: #5a52d5;
+        border-color: #5a52d5;
+      }
 
-        .event-details {
-            display: none;
-        }
+      .event-details {
+        display: none;
+      }
 
-        .error-message {
-            display: none;
-        }
+      .error-message {
+        display: none;
+      }
 
-        .success-message {
-            display: none;
-        }
+      .success-message {
+        display: none;
+      }
     </style>
-</head>
+  </head>
 
-<body>
+  <body>
     <div class="container py-5">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <!-- Agregar este botón de regreso -->
-                <div class="text-start mb-4">
-                    <a href="dashboard.html" class="btn btn-outline-primary custom-back-btn">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                            class="bi bi-arrow-left me-2" viewBox="0 0 16 16">
-                            <path fill-rule="evenodd"
-                                d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z" />
-                        </svg>
-                        Regresar al Dashboard
-                    </a>
-                </div>
-                <div class="custom-card p-4">
-                    <h2 class="text-center mb-4 primary-color">Unirse a un Evento</h2>
+      <div class="row justify-content-center">
+        <div class="col-md-8">
+          <!-- Agregar este botón de regreso -->
+          <div class="text-start mb-4">
+            <a
+              href="dashboard.html"
+              class="btn btn-outline-primary custom-back-btn"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                fill="currentColor"
+                class="bi bi-arrow-left me-2"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"
+                />
+              </svg>
+              Regresar al Dashboard
+            </a>
+          </div>
+          <div class="custom-card p-4">
+            <h2 class="text-center mb-4 primary-color">Unirse a un Evento</h2>
 
-
-                    <!-- Formulario de búsqueda -->
-                    <div class="search-form mb-4">
-                        <div class="mb-3">
-                            <label for="eventId" class="form-label">ID del Evento</label>
-                            <input type="text" class="form-control" id="eventId"
-                                placeholder="Ingresa el ID del evento a unirte" />
-                        </div>
-                        <div class="text-center">
-                            <button class="btn btn-primary custom-btn" onclick="buscarEvento()">
-                                Unirme al Evento
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Mensajes de error y éxito -->
-                    <div id="errorMessage" class="error-message alert alert-danger"></div>
-                    <div id="successMessage" class="success-message alert alert-success"></div>
-
-                    <!-- Detalles del evento -->
-                    <div id="eventDetails" class="event-details mt-4">
-                        <h3 class="text-center mb-4">Detalles del Evento</h3>
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <p>
-                                            <strong>ID del Evento:</strong>
-                                            <span id="displayEventId"></span>
-                                        </p>
-                                        <p>
-                                            <strong>Encargado:</strong>
-                                            <span id="displayEncargado"></span>
-                                        </p>
-                                        <p>
-                                            <strong>Fecha:</strong> <span id="displayFecha"></span>
-                                        </p>
-                                        <p>
-                                            <strong>Zona:</strong> <span id="displayZona"></span>
-                                        </p>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <p>
-                                            <strong>Hora de Inicio:</strong>
-                                            <span id="displayHoraInicio"></span>
-                                        </p>
-                                        <p>
-                                            <strong>Hora de Fin:</strong>
-                                            <span id="displayHoraFin"></span>
-                                        </p>
-                                        <p>
-                                            <strong>Estado:</strong>
-                                            <span id="displayEstado"></span>
-                                        </p>
-                                        <p>
-                                            <strong>Fecha de Creación:</strong>
-                                            <span id="displayFechaCreacion"></span>
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <!-- Formulario de búsqueda -->
+            <div class="search-form mb-4">
+              <div class="mb-3">
+                <label for="eventId" class="form-label">ID del Evento</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="eventId"
+                  placeholder="Ingresa el ID del evento a unirte"
+                />
+              </div>
+              <div class="text-center">
+                <button
+                  class="btn btn-primary custom-btn"
+                  onclick="buscarEvento()"
+                >
+                  Unirme al Evento
+                </button>
+              </div>
             </div>
+
+            <!-- Mensajes de error y éxito -->
+            <div
+              id="errorMessage"
+              class="error-message alert alert-danger"
+            ></div>
+            <div
+              id="successMessage"
+              class="success-message alert alert-success"
+            ></div>
+
+            <!-- Detalles del evento -->
+            <div id="eventDetails" class="event-details mt-4">
+              <h3 class="text-center mb-4">Detalles del Evento</h3>
+              <div class="card">
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <p>
+                        <strong>ID del Evento:</strong>
+                        <span id="displayEventId"></span>
+                      </p>
+                      <p>
+                        <strong>Encargado:</strong>
+                        <span id="displayEncargado"></span>
+                      </p>
+                      <p>
+                        <strong>Fecha:</strong> <span id="displayFecha"></span>
+                      </p>
+                      <p>
+                        <strong>Zona:</strong> <span id="displayZona"></span>
+                      </p>
+                    </div>
+                    <div class="col-md-6">
+                      <p>
+                        <strong>Hora de Inicio:</strong>
+                        <span id="displayHoraInicio"></span>
+                      </p>
+                      <p>
+                        <strong>Hora de Fin:</strong>
+                        <span id="displayHoraFin"></span>
+                      </p>
+                      <p>
+                        <strong>Estado:</strong>
+                        <span id="displayEstado"></span>
+                      </p>
+                      <p>
+                        <strong>Fecha de Creación:</strong>
+                        <span id="displayFechaCreacion"></span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
+    <!-- config source -->
+    <script src="js/config.js"></script>
     <!-- Custom JavaScript -->
     <script>
-        async function buscarEvento() {
-            const eventId = document.getElementById("eventId").value.trim();
+      async function buscarEvento() {
+        const eventId = document.getElementById("eventId").value.trim();
 
-            // Resetear mensajes y detalles
-            document.getElementById("errorMessage").style.display = "none";
-            document.getElementById("successMessage").style.display = "none";
-            document.getElementById("eventDetails").style.display = "none";
+        // Resetear mensajes y detalles
+        document.getElementById("errorMessage").style.display = "none";
+        document.getElementById("successMessage").style.display = "none";
+        document.getElementById("eventDetails").style.display = "none";
 
-            if (!eventId) {
-                mostrarError("Por favor, ingresa el ID del evento");
-                return;
-            }
-
-            try {
-                const response = await fetch(
-                    `http://localhost:3000/api/eventos/${eventId}`
-                );
-                if (!response.ok) {
-                    mostrarError("Evento no encontrado");
-                    return;
-                }
-
-                const eventoData = await response.json();
-                mostrarDetallesEvento(eventoData);
-                mostrarExito("¡Te has unido al evento exitosamente!");
-            } catch (error) {
-                mostrarError("Error al buscar el evento: " + error.message);
-            }
+        if (!eventId) {
+          mostrarError("Por favor, ingresa el ID del evento");
+          return;
         }
 
-        function mostrarDetallesEvento(evento) {
-            document.getElementById("displayEventId").textContent = evento.id;
-            document.getElementById("displayEncargado").textContent =
-                evento.encargadoNombre;
-            document.getElementById("displayFecha").textContent = formatearFecha(
-                evento.fecha
-            );
-            document.getElementById("displayZona").textContent = evento.zona;
-            document.getElementById("displayHoraInicio").textContent =
-                evento.horaInicio;
-            document.getElementById("displayHoraFin").textContent = evento.horaFin;
-            document.getElementById("displayEstado").textContent = evento.estado;
-            document.getElementById("displayFechaCreacion").textContent =
-                formatearFecha(evento.fechaCreacion);
+        try {
+          // Usamos la nueva API_URL en lugar de la URL hardcodeada
+          const response = await fetch(`${config.API_URL}/eventos/${eventId}`);
+          if (!response.ok) {
+            mostrarError("Evento no encontrado");
+            return;
+          }
 
-            document.getElementById("eventDetails").style.display = "block";
+          const eventoData = await response.json();
+          mostrarDetallesEvento(eventoData);
+          mostrarExito("¡Te has unido al evento exitosamente!");
+        } catch (error) {
+          mostrarError("Error al buscar el evento: " + error.message);
         }
+      }
 
-        function formatearFecha(fecha) {
-            return new Date(fecha).toLocaleDateString("es-ES", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-            });
-        }
+      function mostrarDetallesEvento(evento) {
+        document.getElementById("displayEventId").textContent = evento.id;
+        document.getElementById("displayEncargado").textContent =
+          evento.encargadoNombre;
+        document.getElementById("displayFecha").textContent = formatearFecha(
+          evento.fecha
+        );
+        document.getElementById("displayZona").textContent = evento.zona;
+        document.getElementById("displayHoraInicio").textContent =
+          evento.horaInicio;
+        document.getElementById("displayHoraFin").textContent = evento.horaFin;
+        document.getElementById("displayEstado").textContent = evento.estado;
+        document.getElementById("displayFechaCreacion").textContent =
+          formatearFecha(evento.fechaCreacion);
 
-        function mostrarError(mensaje) {
-            const errorDiv = document.getElementById("errorMessage");
-            errorDiv.textContent = mensaje;
-            errorDiv.style.display = "block";
-        }
+        document.getElementById("eventDetails").style.display = "block";
+      }
 
-        function mostrarExito(mensaje) {
-            const successDiv = document.getElementById("successMessage");
-            successDiv.textContent = mensaje;
-            successDiv.style.display = "block";
-        }
+      function formatearFecha(fecha) {
+        return new Date(fecha).toLocaleDateString("es-ES", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        });
+      }
+
+      function mostrarError(mensaje) {
+        const errorDiv = document.getElementById("errorMessage");
+        errorDiv.textContent = mensaje;
+        errorDiv.style.display = "block";
+      }
+
+      function mostrarExito(mensaje) {
+        const successDiv = document.getElementById("successMessage");
+        successDiv.textContent = mensaje;
+        successDiv.style.display = "block";
+      }
     </script>
-</body>
-
+  </body>
 </html>
