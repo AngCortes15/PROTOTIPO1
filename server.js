@@ -378,11 +378,69 @@ const generateEventId = () => {
 // POST - Crear nuevo evento (con el nuevo generador de IDs)
 app.post('/api/eventos', async (req, res) => {
     try {
-        const { encargadoId, encargadoNombre, fecha, horaInicio, horaFin, zona } = req.body;
+        const { 
+            encargadoId, 
+            encargadoNombre,
+            nombreEvento,
+            descripcion,
+            fecha, 
+            horaInicio, 
+            horaFin, 
+            zona,
+            direccion,
+            categoria,
+            pasion,
+            capacidadMaxima,
+            tipoParticipacion,
+            precio,
+            requisitos,
+            whatsappHost,
+            emailContacto,
+            esPublico,
+            aprobarParticipantes
+        } = req.body;
         
         // Validar campos requeridos
-        if (!encargadoId || !fecha || !horaInicio || !horaFin || !zona) {
-            return res.status(400).json({ mensaje: 'Todos los campos son requeridos' });
+        const camposRequeridos = {
+            encargadoId,
+            nombreEvento,
+            descripcion,
+            fecha,
+            horaInicio,
+            horaFin,
+            zona,
+            categoria,
+            pasion,
+            capacidadMaxima,
+            tipoParticipacion,
+            whatsappHost
+        };
+        
+        const camposFaltantes = Object.keys(camposRequeridos).filter(key => !camposRequeridos[key]);
+        
+        if (camposFaltantes.length > 0) {
+            return res.status(400).json({ 
+                mensaje: 'Todos los campos marcados como requeridos son obligatorios',
+                camposFaltantes: camposFaltantes
+            });
+        }
+
+        // Validar capacidad máxima
+        const capacidad = parseInt(capacidadMaxima);
+        if (isNaN(capacidad) || capacidad < 1 || capacidad > 100) {
+            return res.status(400).json({
+                mensaje: 'La capacidad máxima debe ser un número entre 1 y 100'
+            });
+        }
+
+        // Validar precio si el tipo de participación es "Pago"
+        if (tipoParticipacion === 'Pago') {
+            const precioNum = parseFloat(precio);
+            if (isNaN(precioNum) || precioNum < 0) {
+                return res.status(400).json({
+                    mensaje: 'Para eventos de pago, debe indicar un precio válido mayor o igual a 0'
+                });
+            }
         }
 
         // Verificar que el encargado existe
@@ -403,13 +461,39 @@ app.post('/api/eventos', async (req, res) => {
         // Usar el nombre real del usuario de la base de datos
         const nombreReal = `${userResult.Item.nombres} ${userResult.Item.apellidos}`;
 
+        // Validar formato de WhatsApp
+        const whatsappRegex = /^\+?[1-9]\d{1,14}$/;
+        if (!whatsappRegex.test(whatsappHost.replace(/\s+/g, ''))) {
+            return res.status(400).json({
+                mensaje: 'El número de WhatsApp no tiene un formato válido'
+            });
+        }
+
+        // Validar email si fue proporcionado
+        if (emailContacto) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(emailContacto)) {
+                return res.status(400).json({
+                    mensaje: 'El correo electrónico no tiene un formato válido'
+                });
+            }
+        }
+
+        // Validar que la hora de fin sea posterior a la hora de inicio
+        if (horaFin <= horaInicio) {
+            return res.status(400).json({
+                mensaje: 'La hora de finalización debe ser posterior a la hora de inicio'
+            });
+        }
+
         // Validar disponibilidad de la zona
         const paramsValidacion = {
             TableName: TABLE_EVENTOS,
-            FilterExpression: 'fecha = :fecha AND zona = :zona',
+            FilterExpression: 'fecha = :fecha AND zona = :zona AND estado = :estado',
             ExpressionAttributeValues: {
                 ':fecha': fecha,
-                ':zona': zona
+                ':zona': zona,
+                ':estado': 'activo'
             }
         };
 
@@ -417,21 +501,64 @@ app.post('/api/eventos', async (req, res) => {
         
         const zonaOcupada = eventosExistentes.Items.some(evento => 
             (horaInicio >= evento.horaInicio && horaInicio < evento.horaFin) ||
-            (horaFin > evento.horaInicio && horaFin <= evento.horaFin)
+            (horaFin > evento.horaInicio && horaFin <= evento.horaFin) ||
+            (horaInicio <= evento.horaInicio && horaFin >= evento.horaFin)
         );
 
         if (zonaOcupada) {
             return res.status(400).json({ mensaje: 'La zona está ocupada en ese horario' });
         }
 
+        // Validar valores de categoría
+        const categoriasValidas = [
+            'Musical', 'Literaria', 'Artística', 'Tecnológica', 'Educativa',
+            'Gastronómica', 'Deportiva', 'Cultural', 'Empresarial', 'Social'
+        ];
+        
+        if (!categoriasValidas.includes(categoria)) {
+            return res.status(400).json({ mensaje: 'Categoría no válida' });
+        }
+        
+        // Validar valores de pasión
+        const pasionesValidas = [
+            'Poesía', 'Concierto', 'Fotografía', 'Pintura', 'Desarrollo Web',
+            'Cocina', 'Danza', 'Yoga', 'Escritura Creativa', 'Podcast',
+            'Networking', 'Gaming'
+        ];
+        
+        if (!pasionesValidas.includes(pasion)) {
+            return res.status(400).json({ mensaje: 'Pasión no válida' });
+        }
+
+        // Validar tipo de participación
+        const tiposParticipacionValidos = ['Gratuito', 'Pago', 'Donación voluntaria'];
+        if (!tiposParticipacionValidos.includes(tipoParticipacion)) {
+            return res.status(400).json({ mensaje: 'Tipo de participación no válido' });
+        }
+
         const newEvento = {
             id: generateEventId(),
             encargadoId,
             encargadoNombre: nombreReal, // Usamos el nombre real del usuario
+            nombreEvento,
+            descripcion,
             fecha,
             horaInicio,
             horaFin,
             zona,
+            direccion: direccion || '',
+            categoria,
+            pasion,
+            capacidadMaxima: capacidad,
+            tipoParticipacion,
+            precio: tipoParticipacion === 'Pago' ? parseFloat(precio) : 0,
+            requisitos: requisitos || '',
+            whatsappHost: whatsappHost.replace(/\s+/g, ''),
+            emailContacto: emailContacto || '',
+            esPublico: esPublico !== undefined ? esPublico : true,
+            aprobarParticipantes: aprobarParticipantes || false,
+            participantesInscritos: 0, // Contador de participantes inscritos inicializado en 0
+            participantes: [], // Array para almacenar los IDs de los participantes
             fechaCreacion: new Date().toISOString(),
             estado: 'activo'
         };
@@ -451,7 +578,6 @@ app.post('/api/eventos', async (req, res) => {
         });
     }
 });
-
 
 // GET - Obtener eventos por fecha (ruta adicional útil)
 app.get('/api/eventos/fecha/:fecha', async (req, res) => {
