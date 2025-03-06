@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crear Evento - Tantuyo</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <style>
         :root {
             --primary-color: #4e54c8;
@@ -16,17 +17,17 @@
             --light-color: #f9f9f9;
             --dark-color: #333;
         }
-        
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
+
         .main-container {
             min-height: 100vh;
             background: linear-gradient(135deg, var(--secondary-color) 0%, var(--primary-color) 100%);
             padding: 40px 20px;
         }
-        
+
         .form-container {
             max-width: 850px;
             margin: 0 auto;
@@ -36,7 +37,7 @@
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
             animation: fadeIn 0.8s;
         }
-        
+
         .form-title {
             color: var(--primary-color);
             font-weight: 700;
@@ -45,7 +46,7 @@
             position: relative;
             padding-bottom: 15px;
         }
-        
+
         .form-title:after {
             content: "";
             position: absolute;
@@ -57,24 +58,26 @@
             background: var(--accent-color);
             border-radius: 2px;
         }
-        
+
         .form-label {
             font-weight: 600;
             color: var(--dark-color);
         }
-        
-        .form-control, .form-select {
+
+        .form-control,
+        .form-select {
             border: 2px solid #e9ecef;
             border-radius: 10px;
             padding: 12px;
             transition: all 0.3s;
         }
-        
-        .form-control:focus, .form-select:focus {
+
+        .form-control:focus,
+        .form-select:focus {
             border-color: var(--primary-color);
             box-shadow: 0 0 0 0.25rem rgba(78, 84, 200, 0.25);
         }
-        
+
         .btn-primary {
             background: var(--primary-color);
             border: none;
@@ -83,13 +86,13 @@
             font-weight: 600;
             transition: all 0.3s;
         }
-        
+
         .btn-primary:hover {
             background: #3c42a1;
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
-        
+
         .btn-outline-secondary {
             border-color: var(--secondary-color);
             color: var(--secondary-color);
@@ -98,14 +101,14 @@
             font-weight: 600;
             transition: all 0.3s;
         }
-        
+
         .btn-outline-secondary:hover {
             background: var(--secondary-color);
             color: white;
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
-        
+
         .section-title {
             color: var(--primary-color);
             font-size: 1.2rem;
@@ -114,11 +117,11 @@
             padding-bottom: 8px;
             border-bottom: 2px solid var(--secondary-color);
         }
-        
+
         .input-icon-container {
             position: relative;
         }
-        
+
         .input-icon {
             position: absolute;
             right: 15px;
@@ -127,24 +130,24 @@
             color: var(--primary-color);
             pointer-events: none;
         }
-        
+
         .alert {
             border-radius: 10px;
             animation: fadeIn 0.5s;
         }
-        
+
         .character-counter {
             font-size: 0.8rem;
             color: #6c757d;
             text-align: right;
             margin-top: 5px;
         }
-        
+
         .form-check-input:checked {
             background-color: var(--primary-color);
             border-color: var(--primary-color);
         }
-        
+
         .capacity-badge {
             background: var(--primary-color);
             color: white;
@@ -154,7 +157,7 @@
             display: inline-block;
             margin-left: 10px;
         }
-        
+
         .img-preview {
             max-width: 100%;
             height: auto;
@@ -163,20 +166,28 @@
             border: 2px dashed #e9ecef;
             padding: 5px;
         }
-        
+
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
+
 <body>
     <div class="main-container">
         <div class="form-container animate__animated animate__fadeIn">
             <h2 class="form-title">
                 <i class="fas fa-calendar-plus me-2"></i>Crear Nuevo Evento
             </h2>
-            
+
             <div id="alertMessage" class="alert d-none"></div>
 
             <form id="eventoForm" class="needs-validation" novalidate>
@@ -205,7 +216,8 @@
                     <div class="mb-3">
                         <label class="form-label">Nombre del Evento</label>
                         <div class="input-icon-container">
-                            <input type="text" id="nombreEvento" class="form-control" placeholder="Ingresa un nombre para tu evento" required>
+                            <input type="text" id="nombreEvento" class="form-control"
+                                placeholder="Ingresa un nombre para tu evento" required>
                             <i class="fas fa-signature input-icon"></i>
                         </div>
                         <div class="invalid-feedback">Por favor ingresa un nombre para el evento.</div>
@@ -214,7 +226,9 @@
                     <div class="mb-3">
                         <label class="form-label">Descripción del Evento</label>
                         <div class="input-icon-container">
-                            <textarea id="descripcionEvento" class="form-control" rows="4" placeholder="Describe de qué trata tu evento, qué pueden esperar los asistentes..." required maxlength="500"></textarea>
+                            <textarea id="descripcionEvento" class="form-control" rows="4"
+                                placeholder="Describe de qué trata tu evento, qué pueden esperar los asistentes..."
+                                required maxlength="500"></textarea>
                             <i class="fas fa-align-left input-icon" style="top: 25px;"></i>
                         </div>
                         <div class="character-counter"><span id="charCount">0</span>/500 caracteres</div>
@@ -269,11 +283,12 @@
                         </div>
                         <div class="invalid-feedback">Por favor selecciona una zona.</div>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label class="form-label">Dirección Específica</label>
                         <div class="input-icon-container">
-                            <input type="text" id="direccionEvento" class="form-control" placeholder="Proporciona detalles adicionales sobre la ubicación">
+                            <input type="text" id="direccionEvento" class="form-control"
+                                placeholder="Proporciona detalles adicionales sobre la ubicación">
                             <i class="fas fa-map-marked-alt input-icon"></i>
                         </div>
                     </div>
@@ -331,10 +346,13 @@
                     <h5 class="section-title"><i class="fas fa-users me-2"></i>Detalles de Participación</h5>
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label class="form-label">Capacidad Máxima <span class="capacity-badge" id="capacidadBadge">30</span></label>
+                            <label class="form-label">Capacidad Máxima <span class="capacity-badge"
+                                    id="capacidadBadge">30</span></label>
                             <div class="input-icon-container">
-                                <input type="range" id="capacidadMaxima" class="form-range" min="1" max="100" value="30" required>
-                                <input type="number" id="capacidadMaximaNum" class="form-control mt-2" min="1" max="100" value="30" required>
+                                <input type="range" id="capacidadMaxima" class="form-range" min="1" max="100" value="30"
+                                    required>
+                                <input type="number" id="capacidadMaximaNum" class="form-control mt-2" min="1" max="100"
+                                    value="30" required>
                                 <i class="fas fa-users input-icon"></i>
                             </div>
                             <div class="invalid-feedback">Por favor define la capacidad máxima.</div>
@@ -357,7 +375,8 @@
                     <div id="seccionPrecio" class="mb-3 d-none">
                         <label class="form-label">Precio (MXN)</label>
                         <div class="input-icon-container">
-                            <input type="number" id="precioEvento" class="form-control" placeholder="Ej: 150.00" min="0" step="0.01">
+                            <input type="number" id="precioEvento" class="form-control" placeholder="Ej: 150.00" min="0"
+                                step="0.01">
                             <i class="fas fa-dollar-sign input-icon"></i>
                         </div>
                     </div>
@@ -365,7 +384,8 @@
                     <div class="mb-3">
                         <label class="form-label">Requisitos para participar</label>
                         <div class="input-icon-container">
-                            <textarea id="requisitosEvento" class="form-control" rows="2" placeholder="Conocimientos previos, materiales necesarios, edad recomendada, etc."></textarea>
+                            <textarea id="requisitosEvento" class="form-control" rows="2"
+                                placeholder="Conocimientos previos, materiales necesarios, edad recomendada, etc."></textarea>
                             <i class="fas fa-clipboard-list input-icon" style="top: 25px;"></i>
                         </div>
                     </div>
@@ -377,7 +397,8 @@
                         <div class="col-md-6">
                             <label class="form-label">WhatsApp del Host</label>
                             <div class="input-icon-container">
-                                <input type="tel" id="whatsappHost" class="form-control" placeholder="+52 1234567890" required>
+                                <input type="tel" id="whatsappHost" class="form-control" placeholder="+52 1234567890"
+                                    required>
                                 <i class="fab fa-whatsapp input-icon"></i>
                             </div>
                             <div class="invalid-feedback">Por favor proporciona un número de WhatsApp.</div>
@@ -385,7 +406,8 @@
                         <div class="col-md-6">
                             <label class="form-label">Correo Electrónico (Opcional)</label>
                             <div class="input-icon-container">
-                                <input type="email" id="emailContacto" class="form-control" placeholder="contacto@ejemplo.com">
+                                <input type="email" id="emailContacto" class="form-control"
+                                    placeholder="contacto@ejemplo.com">
                                 <i class="fas fa-envelope input-icon"></i>
                             </div>
                         </div>
@@ -397,13 +419,15 @@
                     <div class="mb-3">
                         <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" id="eventoPublico" checked>
-                            <label class="form-check-label" for="eventoPublico">Evento público (visible para todos los usuarios)</label>
+                            <label class="form-check-label" for="eventoPublico">Evento público (visible para todos los
+                                usuarios)</label>
                         </div>
                     </div>
                     <div class="mb-3">
                         <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" id="aprobarParticipantes">
-                            <label class="form-check-label" for="aprobarParticipantes">Aprobar manualmente a los participantes</label>
+                            <label class="form-check-label" for="aprobarParticipantes">Aprobar manualmente a los
+                                participantes</label>
                         </div>
                     </div>
                 </div>
@@ -430,10 +454,10 @@
             alertDiv.className = `alert alert-${type}`;
             alertDiv.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>${message}`;
             alertDiv.classList.remove('d-none');
-            
+
             // Scroll to top to ensure alert is visible
             window.scrollTo({ top: 0, behavior: 'smooth' });
-            
+
             setTimeout(() => {
                 alertDiv.classList.add('animate__animated', 'animate__fadeOut');
                 setTimeout(() => {
@@ -452,11 +476,11 @@
 
             try {
                 const response = await fetch(`${API_URL}/users/${userId}`);
-                
+
                 if (!response.ok) {
                     throw new Error('Error en la respuesta del servidor');
                 }
-                
+
                 const usuario = await response.json();
                 document.getElementById('encargadoNombre').value = `${usuario.nombres} ${usuario.apellidos}`;
                 document.getElementById('encargadoId').value = usuario.id;
@@ -479,7 +503,7 @@
             // Validar que hora fin sea mayor que hora inicio
             const horaInicio = document.getElementById('horaInicio').value;
             const horaFin = document.getElementById('horaFin').value;
-            
+
             if (horaFin <= horaInicio) {
                 showAlert('La hora de finalización debe ser posterior a la hora de inicio', 'warning');
                 return;
@@ -540,20 +564,20 @@
         });
 
         // Contador de caracteres para descripción
-        document.getElementById('descripcionEvento').addEventListener('input', function() {
+        document.getElementById('descripcionEvento').addEventListener('input', function () {
             const maxLength = this.getAttribute('maxlength');
             const currentLength = this.value.length;
             document.getElementById('charCount').textContent = currentLength;
         });
 
         // Sincronizar capacidad máxima range y number input
-        document.getElementById('capacidadMaxima').addEventListener('input', function() {
+        document.getElementById('capacidadMaxima').addEventListener('input', function () {
             const value = this.value;
             document.getElementById('capacidadMaximaNum').value = value;
             document.getElementById('capacidadBadge').textContent = value;
         });
 
-        document.getElementById('capacidadMaximaNum').addEventListener('input', function() {
+        document.getElementById('capacidadMaximaNum').addEventListener('input', function () {
             const value = this.value;
             if (value > 100) this.value = 100;
             if (value < 1) this.value = 1;
@@ -562,7 +586,7 @@
         });
 
         // Mostrar/ocultar sección de precio según tipo de participación
-        document.getElementById('tipoParticipacion').addEventListener('change', function() {
+        document.getElementById('tipoParticipacion').addEventListener('change', function () {
             const precioSection = document.getElementById('seccionPrecio');
             if (this.value === 'Pago') {
                 precioSection.classList.remove('d-none');
@@ -582,6 +606,144 @@
         document.addEventListener('DOMContentLoaded', () => {
             cargarDatosEncargado();
         });
+        // Mapeo de pasiones a categorías (permitiendo múltiples categorías por pasión)
+        const pasionACategoria = {
+            // Pasiones con una sola categoría
+            'Poesía': ['Literaria'],
+            'Escritura Creativa': ['Literaria'],
+            'Concierto': ['Musical'],
+            'Fotografía': ['Artística'],
+            'Pintura': ['Artística'],
+            'Desarrollo Web': ['Tecnológica'],
+            'Podcast': ['Tecnológica'],
+            'Gaming': ['Tecnológica'],
+            'Cocina': ['Gastronómica'],
+            'Networking': ['Empresarial'],
+
+            // Pasiones con múltiples categorías
+            'Danza': ['Deportiva', 'Cultural'],
+            'Yoga': ['Deportiva', 'Cultural'],
+
+            // Puedes añadir más mapeos según necesites
+        };
+
+        // Crear un modal HTML para seleccionar categoría cuando hay múltiples opciones
+        function crearModalSeleccionCategoria() {
+            // Verificar si el modal ya existe
+            if (document.getElementById('categoriaSelectorModal')) {
+                return;
+            }
+
+            const modalHTML = `
+    <div class="modal fade" id="categoriaSelectorModal" tabindex="-1" aria-labelledby="categoriaSelectorModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header" style="background-color: var(--primary-color); color: white;">
+                    <h5 class="modal-title" id="categoriaSelectorModalLabel">Selecciona la categoría</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+                </div>
+                <div class="modal-body">
+                    <p>La pasión seleccionada puede pertenecer a múltiples categorías. Por favor, elige la más adecuada para tu evento:</p>
+                    <div id="categoriaOptions" class="d-grid gap-2 mt-3">
+                        <!-- Opciones de categoría serán insertadas dinámicamente -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    `;
+
+            // Añadir el modal al final del body
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        }
+
+        // Mostrar el modal con las opciones de categoría
+        function mostrarSelectorCategoria(categorias, pasionSeleccionada) {
+            const categoriaOptions = document.getElementById('categoriaOptions');
+            categoriaOptions.innerHTML = '';
+
+            categorias.forEach(categoria => {
+                const button = document.createElement('button');
+                button.className = 'btn btn-outline-primary';
+                button.textContent = categoria;
+                button.onclick = function () {
+                    document.getElementById('categoria').value = categoria;
+                    bootstrap.Modal.getInstance(document.getElementById('categoriaSelectorModal')).hide();
+                };
+                categoriaOptions.appendChild(button);
+            });
+
+            // Actualizar título del modal
+            document.getElementById('categoriaSelectorModalLabel').textContent =
+                `Selecciona la categoría para "${pasionSeleccionada}"`;
+
+            // Mostrar el modal
+            const modal = new bootstrap.Modal(document.getElementById('categoriaSelectorModal'));
+            modal.show();
+        }
+
+        // Crear el modal al cargar la página
+        document.addEventListener('DOMContentLoaded', function () {
+            crearModalSeleccionCategoria();
+
+            // Resto del código de inicialización...
+        });
+
+        // Event listener para el cambio de pasión
+        document.getElementById('pasion').addEventListener('change', function () {
+            const pasionSeleccionada = this.value;
+
+            if (!pasionSeleccionada) return; // No hacer nada si no hay pasión seleccionada
+
+            const categoriasCorrespondientes = pasionACategoria[pasionSeleccionada];
+
+            if (!categoriasCorrespondientes || categoriasCorrespondientes.length === 0) {
+                // No hay categorías definidas para esta pasión
+                return;
+            }
+
+            if (categoriasCorrespondientes.length === 1) {
+                // Si solo hay una categoría, seleccionarla directamente
+                document.getElementById('categoria').value = categoriasCorrespondientes[0];
+            } else {
+                // Si hay múltiples categorías, mostrar el selector
+                mostrarSelectorCategoria(categoriasCorrespondientes, pasionSeleccionada);
+            }
+        });
+
+        // Opcionalmente, también podríamos filtrar las pasiones disponibles según la categoría seleccionada
+        document.getElementById('categoria').addEventListener('change', function () {
+            const categoriaSeleccionada = this.value;
+            const pasionSelect = document.getElementById('pasion');
+
+            // Resetear las opciones de pasión (excepto la opción vacía inicial)
+            const defaultOption = pasionSelect.options[0];
+            pasionSelect.innerHTML = '';
+            pasionSelect.appendChild(defaultOption);
+
+            // Si no hay categoría seleccionada, mostrar todas las pasiones
+            if (!categoriaSeleccionada) {
+                // Recrear todas las opciones de pasión desde el objeto pasionACategoria
+                Object.keys(pasionACategoria).forEach(pasion => {
+                    const option = document.createElement('option');
+                    option.value = pasion;
+                    option.textContent = pasion;
+                    pasionSelect.appendChild(option);
+                });
+                return;
+            }
+
+            // Filtrar las pasiones que corresponden a la categoría seleccionada
+            Object.entries(pasionACategoria).forEach(([pasion, categorias]) => {
+                if (categorias.includes(categoriaSeleccionada)) {
+                    const option = document.createElement('option');
+                    option.value = pasion;
+                    option.textContent = pasion;
+                    pasionSelect.appendChild(option);
+                }
+            });
+        });
     </script>
 </body>
+
 </html>
