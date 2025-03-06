@@ -286,6 +286,7 @@ app.post("/api/users", async (req, res) => {
       instagram,
       edad: Number(edad),
       fechaRegistro: new Date().toISOString(),
+      saldo: 20.00, // Saldo inicial al registrarse
     };
 
     const params = {
@@ -447,6 +448,119 @@ app.post("/api/users/check-duplicate", async (req, res) => {
           mensaje: "Error al verificar duplicados",
           error: error.message
       });
+  }
+});
+
+// Rutas para el balance
+// Añade estas rutas a tu server.js
+
+// Obtener el saldo actual de un usuario
+app.get("/api/users/:id/balance", async (req, res) => {
+  try {
+    const params = {
+      TableName: TABLE_USERS,
+      Key: {
+        id: req.params.id,
+      },
+      ProjectionExpression: "id, nombres, apellidos, saldo"
+    };
+
+    const result = await dynamoDB.get(params).promise();
+
+    if (!result.Item) {
+      return res.status(404).json({ mensaje: "Usuario no encontrado" });
+    }
+
+    // Si el usuario no tiene saldo, devolver 0
+    const balance = result.Item.saldo !== undefined ? result.Item.saldo : 0;
+
+    res.json({
+      id: result.Item.id,
+      nombres: result.Item.nombres,
+      apellidos: result.Item.apellidos,
+      saldo: balance
+    });
+  } catch (error) {
+    console.error("Error al obtener saldo:", error);
+    res.status(500).json({
+      mensaje: "Error al obtener el saldo",
+      error: error.message,
+    });
+  }
+});
+
+// Actualizar el saldo de un usuario (añadir o restar)
+app.post("/api/users/:id/balance", async (req, res) => {
+  try {
+    const { amount, operation } = req.body;
+    
+    if (amount === undefined || !['add', 'subtract'].includes(operation)) {
+      return res.status(400).json({ 
+        mensaje: "Se requiere una cantidad (amount) y operación válida (add o subtract)" 
+      });
+    }
+    
+    // Obtener usuario actual para verificar el saldo
+    const userParams = {
+      TableName: TABLE_USERS,
+      Key: {
+        id: req.params.id,
+      }
+    };
+    
+    const userResult = await dynamoDB.get(userParams).promise();
+    
+    if (!userResult.Item) {
+      return res.status(404).json({ mensaje: "Usuario no encontrado" });
+    }
+    
+    // Obtener saldo actual (default a 0 si no existe)
+    const currentBalance = userResult.Item.saldo !== undefined ? userResult.Item.saldo : 0;
+    
+    // Calcular nuevo saldo
+    let newBalance;
+    if (operation === 'add') {
+      newBalance = currentBalance + parseFloat(amount);
+    } else {
+      newBalance = currentBalance - parseFloat(amount);
+      // Verificar que no quede balance negativo
+      if (newBalance < 0) {
+        return res.status(400).json({ 
+          mensaje: "Saldo insuficiente para realizar esta operación",
+          saldoActual: currentBalance 
+        });
+      }
+    }
+    
+    // Actualizar el saldo en la base de datos
+    const updateParams = {
+      TableName: TABLE_USERS,
+      Key: {
+        id: req.params.id,
+      },
+      UpdateExpression: "set saldo = :saldo",
+      ExpressionAttributeValues: {
+        ":saldo": newBalance
+      },
+      ReturnValues: "ALL_NEW"
+    };
+    
+    const result = await dynamoDB.update(updateParams).promise();
+    
+    res.json({
+      mensaje: `Saldo ${operation === 'add' ? 'aumentado' : 'reducido'} correctamente`,
+      saldoAnterior: currentBalance,
+      saldoActual: result.Attributes.saldo,
+      operacion: operation,
+      cantidad: parseFloat(amount)
+    });
+    
+  } catch (error) {
+    console.error("Error al actualizar saldo:", error);
+    res.status(500).json({
+      mensaje: "Error al actualizar el saldo",
+      error: error.message,
+    });
   }
 });
 

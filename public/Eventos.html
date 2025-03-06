@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eventos de Poesía</title>
+    <title>Eventos - Tantuyo Centro Cultural</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary-color: #1a73e8;
@@ -20,22 +23,90 @@
             --text-light: #5f6368;
             --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             --border-radius: 8px;
+            --inscrito-bg: #eaf7f0;
+            /* Color de fondo para eventos inscritos */
+            --inscrito-border: #2e7d32;
+            /* Color de borde para eventos inscritos */
         }
-        
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Poppins', sans-serif;
             margin: 0;
             padding: 0;
             background-color: #f0f4f8;
             color: var(--text-dark);
         }
-        
+
+        /* Navbar styles */
+        .navbar {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+            padding: 0.8rem 2rem;
+            margin-bottom: 20px;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: transform 0.2s;
+        }
+
+        .navbar-brand:hover {
+            transform: scale(1.02);
+        }
+
+        .brand-logo {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.1;
+        }
+
+        .brand-name {
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: #4a2d8b;
+            margin: 0;
+        }
+
+        .brand-tagline {
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin: 0;
+        }
+
+        .back-button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #f3f4f6;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            color: #4b5563;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .back-button:hover {
+            background-color: #e5e7eb;
+            transform: translateX(-2px);
+        }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
         }
-        
+
         /* Header section */
         .header {
             background-color: white;
@@ -47,7 +118,7 @@
             justify-content: space-between;
             align-items: center;
         }
-        
+
         .header-title {
             display: flex;
             align-items: center;
@@ -55,12 +126,12 @@
             font-size: 22px;
             font-weight: 600;
         }
-        
+
         .header-title i {
             font-size: 28px;
             color: var(--primary-color);
         }
-        
+
         .create-event-btn {
             background-color: var(--primary-color);
             color: white;
@@ -72,11 +143,11 @@
             cursor: pointer;
             transition: background-color 0.3s;
         }
-        
+
         .create-event-btn:hover {
             background-color: #0d5bbb;
         }
-        
+
         /* Filter section */
         .filters {
             display: flex;
@@ -88,12 +159,12 @@
             border-radius: var(--border-radius);
             box-shadow: var(--shadow);
         }
-        
+
         .view-options {
             display: flex;
             gap: 10px;
         }
-        
+
         .view-btn {
             background-color: transparent;
             border: 1px solid #dadce0;
@@ -103,17 +174,18 @@
             color: var(--text-light);
             transition: background-color 0.2s;
         }
-        
-        .view-btn.active, .view-btn:hover {
+
+        .view-btn.active,
+        .view-btn:hover {
             background-color: #e8f0fe;
             color: var(--primary-color);
         }
-        
+
         .filter-options {
             display: flex;
             gap: 15px;
         }
-        
+
         .filter-select {
             padding: 8px 15px;
             border: 1px solid #dadce0;
@@ -122,27 +194,50 @@
             font-size: 14px;
             cursor: pointer;
         }
-        
+
         /* Events section */
         .events-container {
             display: flex;
             flex-direction: column;
             gap: 20px;
         }
-        
+
         .event-card {
             background-color: white;
             border-radius: var(--border-radius);
             box-shadow: var(--shadow);
             padding: 20px;
             transition: transform 0.2s;
+            border-left: 4px solid transparent;
+            position: relative;
         }
-        
+
         .event-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
-        
+
+        /* Estilo para eventos inscritos */
+        .event-card.inscrito {
+            background-color: var(--inscrito-bg);
+            border-left: 4px solid var(--inscrito-border);
+        }
+
+        .inscrito-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: var(--inscrito-border);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
         .event-header {
             display: flex;
             justify-content: space-between;
@@ -151,18 +246,18 @@
             padding-bottom: 15px;
             border-bottom: 1px solid #eeeeee;
         }
-        
+
         .event-title {
             font-size: 20px;
             font-weight: 600;
             margin: 0;
         }
-        
+
         .event-category {
             font-size: 16px;
             color: var(--accent-color);
         }
-        
+
         .event-date {
             font-size: 15px;
             color: var(--text-light);
@@ -170,13 +265,13 @@
             align-items: center;
             gap: 5px;
         }
-        
+
         .event-actions {
             display: flex;
             gap: 15px;
             margin-top: 15px;
         }
-        
+
         .btn {
             padding: 8px 16px;
             border: none;
@@ -190,34 +285,39 @@
             gap: 5px;
             transition: background-color 0.3s;
         }
-        
+
         .btn-join {
             background-color: var(--green-button);
             color: white;
         }
-        
+
         .btn-join:hover {
             background-color: var(--green-button-hover);
         }
-        
+
+        .btn-join.inscrito {
+            background-color: #7b7b7b;
+            cursor: not-allowed;
+        }
+
         .btn-info {
             background-color: var(--purple-button);
             color: white;
         }
-        
+
         .btn-info:hover {
             background-color: var(--purple-button-hover);
         }
-        
+
         .btn-whatsapp {
             background-color: var(--blue-button);
             color: white;
         }
-        
+
         .btn-whatsapp:hover {
             background-color: var(--blue-button-hover);
         }
-        
+
         /* Event details (hidden by default) */
         .event-details {
             display: none;
@@ -225,28 +325,28 @@
             padding-top: 15px;
             border-top: 1px dashed #e0e0e0;
         }
-        
+
         .event-details.active {
             display: block;
             animation: fadeIn 0.3s ease-in;
         }
-        
+
         .detail-section {
             margin-bottom: 15px;
         }
-        
+
         .detail-section h4 {
             margin: 0 0 8px 0;
             color: var(--text-dark);
             font-size: 16px;
         }
-        
+
         .detail-section p {
             margin: 0;
             color: var(--text-light);
             line-height: 1.5;
         }
-        
+
         /* Create event modal (hidden by default) */
         .modal-backdrop {
             display: none;
@@ -260,7 +360,7 @@
             align-items: center;
             justify-content: center;
         }
-        
+
         .modal {
             background-color: white;
             border-radius: var(--border-radius);
@@ -271,7 +371,7 @@
             padding: 25px;
             position: relative;
         }
-        
+
         .modal-close {
             position: absolute;
             top: 15px;
@@ -282,29 +382,29 @@
             cursor: pointer;
             color: var(--text-light);
         }
-        
+
         .modal-header {
             margin-bottom: 20px;
             border-bottom: 1px solid #eeeeee;
             padding-bottom: 15px;
         }
-        
+
         .modal-header h2 {
             margin: 0;
             font-size: 24px;
             color: var(--primary-color);
         }
-        
+
         .form-group {
             margin-bottom: 20px;
         }
-        
+
         .form-group label {
             display: block;
             margin-bottom: 8px;
             font-weight: 500;
         }
-        
+
         .form-control {
             width: 100%;
             padding: 10px;
@@ -312,16 +412,16 @@
             border-radius: 4px;
             font-size: 15px;
         }
-        
+
         textarea.form-control {
             min-height: 100px;
             resize: vertical;
         }
-        
+
         .form-submit {
             text-align: right;
         }
-        
+
         .btn-submit {
             background-color: var(--primary-color);
             color: white;
@@ -332,11 +432,11 @@
             cursor: pointer;
             transition: background-color 0.3s;
         }
-        
+
         .btn-submit:hover {
             background-color: #0d5bbb;
         }
-        
+
         /* Empty state */
         .empty-state {
             text-align: center;
@@ -345,75 +445,107 @@
             border-radius: var(--border-radius);
             box-shadow: var(--shadow);
         }
-        
+
         .empty-state i {
             font-size: 60px;
             color: #dadce0;
             margin-bottom: 20px;
         }
-        
+
         .empty-state h3 {
             margin: 0 0 10px 0;
             font-size: 20px;
             color: var(--text-dark);
         }
-        
+
         .empty-state p {
             margin: 0 0 25px 0;
             color: var(--text-light);
         }
-        
+
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
-        
+
         /* Responsive styles */
         @media (max-width: 768px) {
+            .navbar {
+                padding: 0.8rem 1rem;
+            }
+
+            .back-button span {
+                display: none;
+            }
+
             .event-header {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 10px;
             }
-            
+
             .event-actions {
                 flex-direction: column;
                 width: 100%;
             }
-            
+
             .btn {
                 width: 100%;
             }
-            
+
             .filters {
                 flex-direction: column;
                 gap: 15px;
             }
-            
+
             .filter-options {
                 width: 100%;
                 justify-content: space-between;
             }
-            
+
             .filter-select {
                 flex-grow: 1;
             }
         }
-        
+
         @media (max-width: 480px) {
             .header {
                 flex-direction: column;
                 gap: 15px;
                 text-align: center;
             }
-            
+
             .header-title {
                 justify-content: center;
             }
         }
     </style>
 </head>
+
 <body>
+    <!-- Navbar con logo y botón de regreso -->
+    <nav class="navbar">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">
+                <img src="https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F883171863%2F207532730700%2F1%2Foriginal.20241025-055049?w=512&auto=format%2Ccompress&q=75&sharp=10&rect=74%2C4%2C632%2C632&s=5e6a99698de97f7a0c5f18256bcfd582"
+                    alt="Logo Tantuyo" class="brand-logo">
+                <div class="brand-text">
+                    <span class="brand-name">Tantuyo</span>
+                    <span class="brand-tagline">Centro Cultural</span>
+                </div>
+            </a>
+            <a href="dashboard.html" class="back-button">
+                <i class="fas fa-arrow-left"></i>
+                <span>Volver al Dashboard</span>
+            </a>
+        </div>
+    </nav>
+
     <div class="container">
         <!-- Header section -->
         <div class="header">
@@ -423,7 +555,7 @@
             </div>
             <a href="CreacionEventos.html" class="create-event-btn">Crear Evento</a>
         </div>
-        
+
         <!-- Filters section -->
         <div class="filters">
             <div class="view-options">
@@ -452,12 +584,12 @@
                 </select>
             </div>
         </div>
-        
+
         <!-- Events section -->
         <div class="events-container">
             <!-- Los eventos se cargarán dinámicamente desde la API -->
         </div>
-        
+
         <!-- Create Event Modal -->
         <div class="modal-backdrop" id="createEventModal">
             <div class="modal">
@@ -506,7 +638,8 @@
                     </div>
                     <div class="form-group">
                         <label for="eventWhatsapp">Número de WhatsApp del Host</label>
-                        <input type="tel" id="eventWhatsapp" class="form-control" placeholder="+34 600 00 00 00" required>
+                        <input type="tel" id="eventWhatsapp" class="form-control" placeholder="+34 600 00 00 00"
+                            required>
                     </div>
                     <div class="form-submit">
                         <button type="submit" class="btn-submit">Crear Evento</button>
@@ -520,153 +653,186 @@
     <script>
         // API URL desde config
         const API_URL = config.API_URL;
-        
+
+        // Función para verificar si el usuario está inscrito en un evento
+        async function obtenerEventosInscritos() {
+            const userId = localStorage.getItem('userId');
+            if (!userId) return [];
+
+            try {
+                // Obtenemos todos los eventos
+                const response = await fetch(`${API_URL}/eventos`);
+                if (!response.ok) throw new Error('Error al obtener eventos');
+
+                const eventos = await response.json();
+
+                // Filtramos los eventos donde el usuario aparece en la lista de participantes
+                return eventos
+                    .filter(evento => evento.participantes &&
+                        Array.isArray(evento.participantes) &&
+                        evento.participantes.includes(userId))
+                    .map(evento => evento.id);
+            } catch (error) {
+                console.error('Error al obtener inscripciones:', error);
+                return [];
+            }
+        }
+
         // Función para cargar eventos disponibles y públicos
         async function cargarEventosDisponibles() {
             try {
                 // Mostrar indicador de carga
                 const eventsContainer = document.querySelector('.events-container');
                 eventsContainer.innerHTML = `
-                    <div class="text-center py-5">
-                        <i class="fas fa-spinner fa-spin fa-3x mb-3"></i>
-                        <p>Cargando eventos disponibles...</p>
-                    </div>
-                `;
-                
+            <div class="text-center py-5">
+                <i class="fas fa-spinner fa-spin fa-3x mb-3"></i>
+                <p>Cargando eventos disponibles...</p>
+            </div>
+        `;
+
+                // Obtener eventos inscritos por el usuario
+                const eventosInscritos = await obtenerEventosInscritos();
+
                 // Obtener todos los eventos
                 const response = await fetch(`${API_URL}/eventos`);
                 if (!response.ok) {
                     throw new Error('Error al obtener eventos');
                 }
-                
+
                 const eventos = await response.json();
-                
+
                 // Filtrar solo eventos futuros y públicos
                 const fechaActual = new Date();
                 const fechaActualStr = fechaActual.toISOString().split('T')[0];
-                const horaActual = fechaActual.getHours().toString().padStart(2, '0') + ':' + 
-                                  fechaActual.getMinutes().toString().padStart(2, '0');
-                
+                const horaActual = fechaActual.getHours().toString().padStart(2, '0') + ':' +
+                    fechaActual.getMinutes().toString().padStart(2, '0');
+
                 const eventosDisponibles = eventos.filter(evento => {
                     // Verificar si es público
                     if (!evento.esPublico) return false;
-                    
+
                     // Verificar si la fecha es futura o es hoy pero la hora no ha pasado
                     if (evento.fecha > fechaActualStr) return true;
                     if (evento.fecha === fechaActualStr && evento.horaInicio > horaActual) return true;
-                    
+
                     return false;
                 });
-                
+
                 // Verificar si hay eventos disponibles
                 if (eventosDisponibles.length === 0) {
                     eventsContainer.innerHTML = `
-                        <div class="empty-state">
-                            <i class="far fa-calendar-times"></i>
-                            <h3>No hay eventos disponibles</h3>
-                            <p>Actualmente no hay eventos programados. ¡Sé el primero en crear uno!</p>
-                            <a href="CreacionEventos.html" class="btn btn-primary">
-                                <i class="fas fa-plus-circle me-2"></i>Crear Evento
-                            </a>
-                        </div>
-                    `;
+                <div class="empty-state">
+                    <i class="far fa-calendar-times"></i>
+                    <h3>No hay eventos disponibles</h3>
+                    <p>Actualmente no hay eventos programados. ¡Sé el primero en crear uno!</p>
+                    <a href="CreacionEventos.html" class="btn btn-primary">
+                        <i class="fas fa-plus-circle me-2"></i>Crear Evento
+                    </a>
+                </div>
+            `;
                     return;
                 }
-                
+
                 // Ordenar eventos por fecha/hora
                 eventosDisponibles.sort((a, b) => {
                     if (a.fecha !== b.fecha) return a.fecha.localeCompare(b.fecha);
                     return a.horaInicio.localeCompare(b.horaInicio);
                 });
-                
+
                 // Generar HTML para cada evento
                 const eventosHTML = eventosDisponibles.map((evento, index) => {
                     // Formatear fecha
                     const fechaPartes = evento.fecha.split('-');
                     const fechaFormateada = `${fechaPartes[2]}/${fechaPartes[1]}/${fechaPartes[0]}`;
-                    
+
                     // Espacio disponible
                     const espacioDisponible = evento.capacidadMaxima - (evento.participantesInscritos || 0);
-                    
+
+                    // Verificar si el usuario está inscrito en este evento
+                    const inscrito = eventosInscritos.includes(evento.id);
+
                     return `
-                        <div class="event-card">
-                            <div class="event-header">
-                                <div>
-                                    <h2 class="event-title">${evento.nombreEvento}</h2>
-                                    <div class="event-category">${evento.categoria} - ${evento.pasion}</div>
-                                </div>
-                                <div class="event-date">
-                                    <i class="far fa-calendar-alt"></i>
-                                    <span>Fecha: ${fechaFormateada}</span>
-                                </div>
-                            </div>
-                            <div class="event-actions">
-                                <button class="btn btn-join" onclick="inscribirseEvento('${evento.id}')">
-                                    <i class="fas fa-user-plus"></i> Apuntarse
-                                </button>
-                                <button class="btn btn-info" data-event="event${index}">
-                                    <i class="fas fa-info-circle"></i> Más Info
-                                </button>
-                                <button class="btn btn-whatsapp" onclick="window.open('https://wa.me/${evento.whatsappHost.replace(/[^0-9]/g, '')}', '_blank')">
-                                    <i class="fab fa-whatsapp"></i> Whatsapp Host
-                                </button>
-                            </div>
-                            <div class="event-details" id="event${index}-details">
-                                <div class="detail-section">
-                                    <h4>Descripción</h4>
-                                    <p>${evento.descripcion || 'No hay descripción disponible.'}</p>
-                                </div>
-                                <div class="detail-section">
-                                    <h4>Ubicación</h4>
-                                    <p>${evento.zona}${evento.direccion ? ` - ${evento.direccion}` : ''}</p>
-                                </div>
-                                <div class="detail-section">
-                                    <h4>Horario</h4>
-                                    <p>${evento.horaInicio} - ${evento.horaFin} hrs</p>
-                                </div>
-                                <div class="detail-section">
-                                    <h4>Organizador</h4>
-                                    <p>${evento.encargadoNombre}</p>
-                                </div>
-                                <div class="detail-section">
-                                    <h4>Plazas disponibles</h4>
-                                    <p>${espacioDisponible} de ${evento.capacidadMaxima}</p>
-                                </div>
-                                ${evento.tipoParticipacion !== 'Gratuito' ? `
-                                <div class="detail-section">
-                                    <h4>Tipo de participación</h4>
-                                    <p>${evento.tipoParticipacion}${evento.precio > 0 ? ` - ${evento.precio.toFixed(2)} MXN` : ''}</p>
-                                </div>` : ''}
-                                ${evento.requisitos ? `
-                                <div class="detail-section">
-                                    <h4>Requisitos</h4>
-                                    <p>${evento.requisitos}</p>
-                                </div>` : ''}
-                            </div>
+                <div class="event-card ${inscrito ? 'inscrito' : ''}">
+                    ${inscrito ? '<div class="inscrito-badge"><i class="fas fa-check-circle"></i> Inscrito</div>' : ''}
+                    <div class="event-header">
+                        <div>
+                            <h2 class="event-title">${evento.nombreEvento}</h2>
+                            <div class="event-category">${evento.categoria} - ${evento.pasion}</div>
                         </div>
-                    `;
+                        <div class="event-date">
+                            <i class="far fa-calendar-alt"></i>
+                            <span>Fecha: ${fechaFormateada}</span>
+                        </div>
+                    </div>
+                    <div class="event-actions">
+                        <button class="btn ${inscrito ? 'btn-join inscrito' : 'btn-join'}" 
+                            ${inscrito ? 'disabled' : `onclick="inscribirseEvento('${evento.id}')"`}>
+                            <i class="fas ${inscrito ? 'fa-check' : 'fa-user-plus'}"></i> 
+                            ${inscrito ? 'Ya inscrito' : 'Apuntarse'}
+                        </button>
+                        <button class="btn btn-info" data-event="event${index}">
+                            <i class="fas fa-info-circle"></i> Más Info
+                        </button>
+                        <button class="btn btn-whatsapp" onclick="window.open('https://wa.me/${evento.whatsappHost.replace(/[^0-9]/g, '')}', '_blank')">
+                            <i class="fab fa-whatsapp"></i> Whatsapp Host
+                        </button>
+                    </div>
+                    <div class="event-details" id="event${index}-details">
+                        <div class="detail-section">
+                            <h4>Descripción</h4>
+                            <p>${evento.descripcion || 'No hay descripción disponible.'}</p>
+                        </div>
+                        <div class="detail-section">
+                            <h4>Ubicación</h4>
+                            <p>${evento.zona}${evento.direccion ? ` - ${evento.direccion}` : ''}</p>
+                        </div>
+                        <div class="detail-section">
+                            <h4>Horario</h4>
+                            <p>${evento.horaInicio} - ${evento.horaFin} hrs</p>
+                        </div>
+                        <div class="detail-section">
+                            <h4>Organizador</h4>
+                            <p>${evento.encargadoNombre}</p>
+                        </div>
+                        <div class="detail-section">
+                            <h4>Plazas disponibles</h4>
+                            <p>${espacioDisponible} de ${evento.capacidadMaxima}</p>
+                        </div>
+                        ${evento.tipoParticipacion !== 'Gratuito' ? `
+                        <div class="detail-section">
+                            <h4>Tipo de participación</h4>
+                            <p>${evento.tipoParticipacion}${evento.precio > 0 ? ` - ${evento.precio.toFixed(2)} MXN` : ''}</p>
+                        </div>` : ''}
+                        ${evento.requisitos ? `
+                        <div class="detail-section">
+                            <h4>Requisitos</h4>
+                            <p>${evento.requisitos}</p>
+                        </div>` : ''}
+                    </div>
+                </div>
+            `;
                 }).join('');
-                
+
                 // Actualizar contenedor con los eventos generados
                 eventsContainer.innerHTML = eventosHTML;
-                
+
                 // Volver a añadir event listeners para el botón de detalles
                 agregarEventListeners();
-                
+
             } catch (error) {
                 console.error('Error:', error);
                 document.querySelector('.events-container').innerHTML = `
-                    <div class="alert alert-danger text-center">
-                        <i class="fas fa-exclamation-circle fa-2x mb-3"></i>
-                        <p>No se pudieron cargar los eventos. Por favor, intenta nuevamente más tarde.</p>
-                        <button class="btn btn-outline-danger mt-2" onclick="cargarEventosDisponibles()">
-                            <i class="fas fa-sync"></i> Reintentar
-                        </button>
-                    </div>
-                `;
+            <div class="alert alert-danger text-center">
+                <i class="fas fa-exclamation-circle fa-2x mb-3"></i>
+                <p>No se pudieron cargar los eventos. Por favor, intenta nuevamente más tarde.</p>
+                <button class="btn btn-outline-danger mt-2" onclick="cargarEventosDisponibles()">
+                    <i class="fas fa-sync"></i> Reintentar
+                </button>
+            </div>
+        `;
             }
         }
-        
+
         // Función para inscribirse a un evento
         async function inscribirseEvento(eventoId) {
             // Verificar si el usuario está autenticado
@@ -676,7 +842,7 @@
                 window.location.href = 'login.html';
                 return;
             }
-            
+
             try {
                 const response = await fetch(`${API_URL}/eventos/${eventoId}/inscripcion`, {
                     method: 'POST',
@@ -685,12 +851,12 @@
                     },
                     body: JSON.stringify({ userId })
                 });
-                
+
                 const resultado = await response.json();
-                
+
                 if (response.ok) {
                     alert('¡Te has inscrito exitosamente al evento!');
-                    // Recargar eventos para actualizar plazas disponibles
+                    // Recargar eventos para actualizar plazas disponibles y mostrar el evento como inscrito
                     cargarEventosDisponibles();
                 } else {
                     alert(resultado.mensaje || 'No se pudo completar la inscripción');
@@ -700,15 +866,15 @@
                 alert('Ocurrió un error al procesar tu inscripción. Intenta nuevamente.');
             }
         }
-        
+
         // Función para agregar event listeners
         function agregarEventListeners() {
             // Toggle event details
             document.querySelectorAll('.btn-info').forEach(button => {
-                button.addEventListener('click', function() {
+                button.addEventListener('click', function () {
                     const eventId = this.getAttribute('data-event');
                     const detailsElement = document.getElementById(`${eventId}-details`);
-                    
+
                     // Toggle the active class
                     if (detailsElement.classList.contains('active')) {
                         detailsElement.classList.remove('active');
@@ -721,29 +887,29 @@
                     }
                 });
             });
-            
+
             // View options toggle
             document.querySelectorAll('.view-btn').forEach(button => {
-                button.addEventListener('click', function() {
+                button.addEventListener('click', function () {
                     document.querySelectorAll('.view-btn').forEach(btn => {
                         btn.classList.remove('active');
                     });
                     this.classList.add('active');
-                    
+
                     // Aquí se implementaría la lógica para cambiar la vista
                 });
             });
         }
-        
+
         // Modal functionality (removed open modal button since we now redirect)
         const modal = document.getElementById('createEventModal');
         const closeModalBtn = document.getElementById('closeModal');
-        
+
         closeModalBtn?.addEventListener('click', () => {
             modal.style.display = 'none';
             document.body.style.overflow = ''; // Restore scrolling
         });
-        
+
         // Close modal when clicking outside
         modal?.addEventListener('click', (event) => {
             if (event.target === modal) {
@@ -751,11 +917,9 @@
                 document.body.style.overflow = '';
             }
         });
-        
+
         // Cargar eventos al iniciar la página
         document.addEventListener('DOMContentLoaded', () => {
             cargarEventosDisponibles();
         });
     </script>
-</body>
-</html>
