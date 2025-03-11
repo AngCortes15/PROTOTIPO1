@@ -40,10 +40,18 @@
             height: auto;
             border-radius: 15px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-            transition: transform 0.3s ease;
+            animation: pulse 1.5s infinite ease-in-out;
         }
-        .logo-container img:hover {
-            transform: scale(1.02);
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.02);
+            }
+            100% {
+                transform: scale(1);
+            }
         }
         .site-title {
             text-align: center;
@@ -73,13 +81,13 @@
             border-radius: 50px;
             transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            background: linear-gradient(45deg, #4CAF50, #45a049);
+            background: linear-gradient(45deg, #4a2d8b, #6b21a8);
             border: none;
         }
         .btn-custom:hover {
             transform: translateY(-3px);
             box-shadow: 0 6px 20px rgba(0,0,0,0.25);
-            background: linear-gradient(45deg, #45a049, #3d8b40);
+            background: linear-gradient(45deg, #6b21a8, #4a2d8b);
         }
         .btn-custom:active {
             transform: translateY(-1px);
@@ -94,7 +102,7 @@
             </div>
             
             <h1 class="site-title">Tantuyo Centro Cultural</h1>
-            <p class="site-description">Tu espacio para el arte y la cultura</p>
+            <p class="site-description">Arte, Tecnología y Comunidad en Un Solo Espacio.</p>
             
             <div class="buttons-container">
                 <a href="login.html" class="btn btn-custom text-white">
