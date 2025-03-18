@@ -564,7 +564,258 @@ app.post("/api/users/:id/balance", async (req, res) => {
   }
 });
 
-///////////////////////////BLE_///// Eventos ////////////////////////////////
+// Verificar si un número de teléfono existe en la base de datos
+app.get("/api/users/check-phone/:phone", async (req, res) => {
+  try {
+    const phone = req.params.phone;
+    
+    if (!phone) {
+      return res.status(400).json({
+        mensaje: "Se requiere un número de teléfono",
+        exists: false
+      });
+    }
+
+    // Buscar usuario con el mismo número de whatsapp (que es el teléfono)
+    const phoneCheckParams = {
+      TableName: TABLE_USERS,
+      FilterExpression: "whatsapp = :whatsapp",
+      ExpressionAttributeValues: {
+        ":whatsapp": phone
+      }
+    };
+
+    const result = await dynamoDB.scan(phoneCheckParams).promise();
+    const exists = result.Items && result.Items.length > 0;
+
+    res.json({
+      exists: exists,
+      mensaje: exists ? "El número existe en la base de datos" : "El número no existe en la base de datos"
+    });
+
+  } catch (error) {
+    console.error("Error al verificar teléfono:", error);
+    res.status(500).json({
+      mensaje: "Error al verificar teléfono",
+      error: error.message,
+      exists: false
+    });
+  }
+});
+
+app.post("/api/transfers", async (req, res) => {
+  try {
+    const { from, toPhone, amount, date } = req.body;
+    
+    if (!from || !toPhone || !amount || amount <= 0) {
+      return res.status(400).json({
+        mensaje: "Se requiere un remitente (from), destinatario (toPhone) y una cantidad positiva (amount)"
+      });
+    }
+
+    // Verificar que ambos usuarios existen
+    // 1. Obtener remitente
+    const fromUserParams = {
+      TableName: TABLE_USERS,
+      Key: {
+        id: from
+      }
+    };
+
+    const fromUserResult = await dynamoDB.get(fromUserParams).promise();
+    if (!fromUserResult.Item) {
+      return res.status(404).json({
+        mensaje: "Usuario remitente no encontrado"
+      });
+    }
+
+    // 2. Obtener destinatario por número de teléfono
+    const toUserParams = {
+      TableName: TABLE_USERS,
+      FilterExpression: "whatsapp = :phone",
+      ExpressionAttributeValues: {
+        ":phone": toPhone
+      }
+    };
+
+    const toUserResult = await dynamoDB.scan(toUserParams).promise();
+    if (!toUserResult.Items || toUserResult.Items.length === 0) {
+      return res.status(404).json({
+        mensaje: "Usuario destinatario no encontrado"
+      });
+    }
+    const toUser = toUserResult.Items[0];
+
+    // 3. Verificar que no se esté transfiriendo a sí mismo
+    if (from === toUser.id) {
+      return res.status(400).json({
+        mensaje: "No puedes transferir dinero a tu propia cuenta"
+      });
+    }
+
+    // 4. Verificar saldo suficiente del remitente
+    const fromBalance = fromUserResult.Item.saldo !== undefined ? fromUserResult.Item.saldo : 0;
+    const amountNum = parseFloat(amount);
+
+    if (fromBalance < amountNum) {
+      return res.status(400).json({
+        mensaje: "Saldo insuficiente para realizar la transferencia",
+        saldoActual: fromBalance
+      });
+    }
+
+    // Usar la tabla Transfers (con mayúscula)
+    const TABLE_TRANSFERS = "Transfers"; // Define la tabla para transferencias
+
+    // 5. Crear registro de transferencia
+    const transferId = `TR-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+    const transferencia = {
+      id: transferId,
+      fromId: from,
+      fromName: `${fromUserResult.Item.nombres} ${fromUserResult.Item.apellidos}`,
+      toId: toUser.id,
+      toName: `${toUser.nombres} ${toUser.apellidos}`,
+      toPhone: toPhone,
+      amount: amountNum,
+      date: date || new Date().toISOString(),
+      status: "completed"
+    };
+
+    // 6. Actualizar saldos de ambos usuarios y guardar transferencia
+    // Usamos transacciones para asegurar que todo se haga o nada se haga
+
+    // Crear promesa para actualizar saldo del remitente (restar)
+    const updateFromParams = {
+      TableName: TABLE_USERS,
+      Key: {
+        id: from,
+      },
+      UpdateExpression: "set saldo = :nuevoSaldo",
+      ExpressionAttributeValues: {
+        ":nuevoSaldo": fromBalance - amountNum
+      },
+      ReturnValues: "UPDATED_NEW"
+    };
+
+    // Crear promesa para actualizar saldo del destinatario (sumar)
+    const toBalance = toUser.saldo !== undefined ? toUser.saldo : 0;
+    const updateToParams = {
+      TableName: TABLE_USERS,
+      Key: {
+        id: toUser.id,
+      },
+      UpdateExpression: "set saldo = :nuevoSaldo",
+      ExpressionAttributeValues: {
+        ":nuevoSaldo": toBalance + amountNum
+      },
+      ReturnValues: "UPDATED_NEW"
+    };
+
+    // Crear promesa para guardar la transferencia
+    const saveTransferParams = {
+      TableName: TABLE_TRANSFERS,
+      Item: transferencia
+    };
+
+    // Ejecutar todas las promesas en secuencia 
+    // Primero actualizamos el remitente, luego el destinatario y finalmente guardamos el registro
+    const fromUpdate = await dynamoDB.update(updateFromParams).promise();
+    const toUpdate = await dynamoDB.update(updateToParams).promise();
+    
+    // Solo guardamos el registro de transferencia si la tabla existe
+    try {
+      await dynamoDB.put(saveTransferParams).promise();
+    } catch (error) {
+      // Si la tabla no existe, continuamos sin error, pero lo registramos
+      console.warn("Advertencia: No se pudo guardar el registro de transferencia.", error.message);
+    }
+
+    res.status(200).json({
+      mensaje: "Transferencia realizada con éxito",
+      transferId: transferId,
+      fromNewBalance: fromUpdate.Attributes.saldo,
+      toNewBalance: toUpdate.Attributes.saldo,
+      amount: amountNum
+    });
+
+  } catch (error) {
+    console.error("Error al realizar transferencia:", error);
+    res.status(500).json({
+      mensaje: "Error al realizar la transferencia",
+      error: error.message
+    });
+  }
+});
+
+// Endpoint para obtener el historial de transferencias de un usuario
+app.get("/api/users/:id/transfers", async (req, res) => {
+  try {
+    const userId = req.params.id;
+    
+    if (!userId) {
+      return res.status(400).json({
+        mensaje: "Se requiere un ID de usuario"
+      });
+    }
+
+    // Verificar que la tabla existe
+    const TABLE_TRANSFERS = "Transfers";
+
+    // Buscar transferencias enviadas
+    const sentParams = {
+      TableName: TABLE_TRANSFERS,
+      FilterExpression: "fromId = :userId",
+      ExpressionAttributeValues: {
+        ":userId": userId
+      }
+    };
+
+    // Buscar transferencias recibidas
+    const receivedParams = {
+      TableName: TABLE_TRANSFERS,
+      FilterExpression: "toId = :userId",
+      ExpressionAttributeValues: {
+        ":userId": userId
+      }
+    };
+
+    try {
+      // Intentar obtener las transferencias
+      const [sentResult, receivedResult] = await Promise.all([
+        dynamoDB.scan(sentParams).promise(),
+        dynamoDB.scan(receivedParams).promise()
+      ]);
+
+      // Combinar y ordenar por fecha (de más reciente a más antigua)
+      const transfers = [
+        ...(sentResult.Items || []).map(t => ({ ...t, type: 'sent' })),
+        ...(receivedResult.Items || []).map(t => ({ ...t, type: 'received' }))
+      ].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      res.json({
+        count: transfers.length,
+        transfers: transfers
+      });
+    } catch (error) {
+      // Si la tabla no existe, devolvemos un arreglo vacío
+      console.warn("Advertencia: No se pudo obtener el historial de transferencias.", error.message);
+      res.json({
+        count: 0,
+        transfers: []
+      });
+    }
+
+  } catch (error) {
+    console.error("Error al obtener historial de transferencias:", error);
+    res.status(500).json({
+      mensaje: "Error al obtener historial de transferencias",
+      error: error.message
+    });
+  }
+});
+
+
+//////////////////////////////// Eventos ////////////////////////////////
 // let eventos = [];
 
 app.get("/api/eventos", async (req, res) => {

@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Transferir Tuyo Coins - Tantuyo Centro Cultural</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/css/intlTelInput.css" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #e9d5ff 0%, #6b21a8 100%);
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+            padding: 0.8rem 2rem;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: transform 0.2s;
+        }
+
+        .navbar-brand:hover {
+            transform: scale(1.02);
+        }
+
+        .brand-logo {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.1;
+        }
+
+        .brand-name {
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: #4a2d8b;
+            margin: 0;
+        }
+
+        .brand-tagline {
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin: 0;
+        }
+
+        /* Estilos para transferencias */
+        .transfer-container {
+            max-width: 600px;
+            margin: 30px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .iti {
+            width: 100%;
+        }
+
+        .transfer-header {
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 15px;
+        }
+
+        .transfer-header h2 {
+            color: #4a2d8b;
+            font-weight: 700;
+        }
+
+        .transfer-form label {
+            font-weight: 600;
+            color: #4a2d8b;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .transfer-form .form-control {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 12px 15px;
+            transition: all 0.3s;
+        }
+
+        .transfer-form .form-control:focus {
+            border-color: #6b21a8;
+            box-shadow: 0 0 0 0.2rem rgba(107, 33, 168, 0.25);
+        }
+
+        .balance-info {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-left: 4px solid #4a2d8b;
+        }
+
+        .balance-value {
+            font-weight: 700;
+            color: #4a2d8b;
+            font-size: 1.2rem;
+        }
+
+        .btn-transferir {
+            background-color: #4a2d8b;
+            border: none;
+            padding: 12px 0;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-transferir:hover {
+            background-color: #6b21a8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-volver {
+            background-color: #f8f9fa;
+            color: #4a2d8b;
+            border: 2px solid #4a2d8b;
+            padding: 10px 0;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-volver:hover {
+            background-color: #e9ecef;
+            color: #4a2d8b;
+        }
+
+        .form-text {
+            color: #6c757d;
+            font-size: 0.85rem;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .success-message {
+            background-color: #d1e7dd;
+            color: #0f5132;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .loading-spinner {
+            display: none;
+            margin-right: 8px;
+        }
+
+        /* Media queries para responsive */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0.8rem 1rem;
+            }
+
+            .transfer-container {
+                margin: 20px 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="dashboard.html">
+                <img src="https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F883171863%2F207532730700%2F1%2Foriginal.20241025-055049?w=512&auto=format%2Ccompress&q=75&sharp=10&rect=74%2C4%2C632%2C632&s=5e6a99698de97f7a0c5f18256bcfd582"
+                    alt="Logo Tantuyo" class="brand-logo">
+                <div class="brand-text">
+                    <span class="brand-name">Tantuyo</span>
+                    <span class="brand-tagline">Centro Cultural</span>
+                </div>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Container principal -->
+    <div class="container">
+        <div class="transfer-container">
+            <div class="transfer-header">
+                <i class="fas fa-exchange-alt fa-3x text-secondary mb-3"></i>
+                <h2>Transferir Tuyo Coins</h2>
+                <p class="text-muted">Envía tus Tuyo Coins a otros usuarios de forma segura</p>
+            </div>
+
+            <!-- Información del saldo -->
+            <div class="balance-info">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <span>Tu saldo actual:</span>
+                        <div class="balance-value"><i class="fas fa-coins me-2" style="color: gold;"></i><span
+                                id="currentBalance">0.00</span> ₮</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mensaje de éxito -->
+            <div class="success-message" id="successMessage">
+                <i class="fas fa-check-circle me-2"></i>
+                <span>Transferencia realizada con éxito.</span>
+            </div>
+
+            <!-- Formulario de transferencia -->
+            <form class="transfer-form" id="transferForm">
+                <div class="mb-3">
+                    <label for="phoneNumber">Número de teléfono del destinatario</label>
+                    <input type="tel" class="form-control" id="phoneNumber" required>
+                    <div class="form-text">Ingresa el número completo, incluyendo el código de país.</div>
+                    <div class="error-message" id="phoneError">Este número no existe en nuestra base de datos.</div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="amount">Cantidad a transferir</label>
+                    <div class="input-group">
+                        <input type="number" class="form-control" id="amount" placeholder="0.00" step="0.01" min="0.01"
+                            required>
+                        <span class="input-group-text">₮</span>
+                    </div>
+                    <div class="form-text">La cantidad mínima de transferencia es 0.01 ₮</div>
+                    <div class="error-message" id="amountError">No tienes saldo suficiente para esta transferencia.
+                    </div>
+                </div>
+
+                <div class="row mb-3 mt-4">
+                    <div class="col">
+                        <a href="dashboard.html" class="btn btn-volver w-100">
+                            <i class="fas fa-arrow-left me-2"></i>Volver
+                        </a>
+                    </div>
+                    <div class="col">
+                        <button type="submit" class="btn btn-transferir btn-primary w-100">
+                            <span class="spinner-border spinner-border-sm loading-spinner" id="loadingSpinner"></span>
+                            Transferir
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/js/intlTelInput.min.js"></script>
+    <script src="js/config.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const API_URL = config.API_URL;
+            const transferForm = document.getElementById('transferForm');
+            const currentBalanceEl = document.getElementById('currentBalance');
+            const amountInput = document.getElementById('amount');
+            const phoneError = document.getElementById('phoneError');
+            const amountError = document.getElementById('amountError');
+            const successMessage = document.getElementById('successMessage');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+
+            // Verificar si el usuario está autenticado
+            const userId = localStorage.getItem('userId');
+            if (!userId) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Obtener el saldo actual del usuario
+            const userSaldo = parseFloat(localStorage.getItem('userSaldo') || 0);
+            currentBalanceEl.textContent = userSaldo.toFixed(2);
+            
+            // Variable global para mantener el saldo actualizado
+            window.userSaldo = userSaldo;
+
+            // Inicializar el selector internacional de teléfono
+            const phoneInput = window.intlTelInput(document.querySelector("#phoneNumber"), {
+                preferredCountries: ["mx", "us", "es"],
+                utilsScript: "https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/js/utils.js",
+                separateDialCode: true,
+                formatOnDisplay: false,
+                customPlaceholder: function() {
+                    return ""; // Placeholder vacío
+                }
+            });
+            
+            // Limitar el input a sólo 10 dígitos numéricos
+            const phoneNumberInput = document.getElementById('phoneNumber');
+            
+            phoneNumberInput.addEventListener('input', function(e) {
+                // Eliminar cualquier caracter que no sea dígito
+                this.value = this.value.replace(/\D/g, '');
+                
+                // Limitar a 10 caracteres
+                if (this.value.length > 10) {
+                    this.value = this.value.slice(0, 10);
+                }
+            });
+
+            // Validar número de teléfono
+            async function validatePhone() {
+                // Verificar que sean exactamente 10 dígitos (sin contar el código de país)
+                const phoneNumber = phoneNumberInput.value;
+                if (phoneNumber.length !== 10) {
+                    phoneError.textContent = "El número debe tener exactamente 10 dígitos.";
+                    phoneError.style.display = 'block';
+                    return false;
+                }
+                
+                if (!phoneInput.isValidNumber()) {
+                    phoneError.textContent = "Ingresa un número de teléfono válido.";
+                    phoneError.style.display = 'block';
+                    return false;
+                }
+
+                const fullPhone = phoneInput.getNumber();
+                
+                // Verificar si es el número del usuario actual
+                try {
+                    // Primero obtenemos el número del usuario actual
+                    const userResponse = await fetch(`${API_URL}/users/${userId}`);
+                    if (!userResponse.ok) {
+                        throw new Error('Error obteniendo datos del usuario');
+                    }
+                    
+                    const userData = await userResponse.json();
+                    
+                    // Si el usuario está tratando de transferir a su propio número
+                    if (userData.whatsapp === fullPhone) {
+                        phoneError.textContent = "No puedes transferir a tu propio número.";
+                        phoneError.style.display = 'block';
+                        return false;
+                    }
+
+                    // Verificar si el número existe en la base de datos
+                    const response = await fetch(`${API_URL}/users/check-phone/${fullPhone}`);
+                    if (!response.ok) {
+                        throw new Error('Error validando número');
+                    }
+                    
+                    const data = await response.json();
+                    if (!data.exists) {
+                        phoneError.textContent = "Este número no existe en nuestra base de datos.";
+                        phoneError.style.display = 'block';
+                        return false;
+                    } else {
+                        phoneError.style.display = 'none';
+                        return true;
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    phoneError.textContent = "Error al validar el número.";
+                    phoneError.style.display = 'block';
+                    return false;
+                }
+            }
+
+            // Validar cantidad
+            function validateAmount() {
+                const amount = parseFloat(amountInput.value);
+                if (isNaN(amount) || amount <= 0) return false;
+
+                // Usar window.userSaldo para que siempre esté actualizado
+                if (amount > window.userSaldo) {
+                    amountError.style.display = 'block';
+                    return false;
+                } else {
+                    amountError.style.display = 'none';
+                    return true;
+                }
+            }
+
+            // Listener para input de cantidad
+            amountInput.addEventListener('input', function () {
+                if (this.value.trim()) {
+                    validateAmount();
+                } else {
+                    amountError.style.display = 'none';
+                }
+            });
+
+            // Prevenir espacios en el input de teléfono
+            phoneNumberInput.addEventListener('keypress', (e) => {
+                // Permitir solo dígitos (0-9)
+                if (!/^\d$/.test(e.key)) {
+                    e.preventDefault();
+                }
+                
+                // Si ya tiene 10 dígitos, no permitir más
+                if (phoneNumberInput.value.length >= 10 && e.key !== 'Backspace' && e.key !== 'Delete') {
+                    e.preventDefault();
+                }
+            });
+
+            // Prevenir pegar contenido con caracteres no numéricos
+            phoneNumberInput.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const text = (e.clipboardData || window.clipboardData).getData('text');
+                const digits = text.replace(/\D/g, '').substring(0, 10);
+                phoneNumberInput.value = digits;
+            });
+
+            // Manejar envío del formulario
+            transferForm.addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                // Ocultar mensajes previos
+                successMessage.style.display = 'none';
+                phoneError.style.display = 'none';
+                amountError.style.display = 'none';
+
+                // Validar campos
+                const isPhoneValid = await validatePhone();
+                const isAmountValid = validateAmount();
+
+                if (!isPhoneValid || !isAmountValid) {
+                    return;
+                }
+
+                // Mostrar spinner de carga
+                loadingSpinner.style.display = 'inline-block';
+
+                const amount = parseFloat(amountInput.value);
+                const phone = phoneInput.getNumber();
+                
+                // Validar que el monto no exceda el saldo actual
+                if (amount > window.userSaldo) {
+                    amountError.style.display = 'block';
+                    return;
+                }
+
+                try {
+                    // Crear objeto de transferencia
+                    const transferData = {
+                        from: userId,
+                        toPhone: phone,
+                        amount: amount,
+                        date: new Date().toISOString()
+                    };
+
+                    // Enviar solicitud de transferencia
+                    const response = await fetch(`${API_URL}/transfers`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(transferData)
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.mensaje || 'Error en la transferencia');
+                    }
+
+                    // Actualizar saldo en localStorage
+                    const newSaldo = userSaldo - amount;
+                    localStorage.setItem('userSaldo', newSaldo);
+                    currentBalanceEl.textContent = newSaldo.toFixed(2);
+                    
+                    // Actualizar la variable userSaldo para futuras transferencias
+                    window.userSaldo = newSaldo;
+
+                    // Mostrar mensaje de éxito
+                    successMessage.style.display = 'block';
+
+                    // Limpiar formulario
+                    transferForm.reset();
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    
+                    // Crear un div para mostrar el error en lugar de usar alert
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'alert alert-danger';
+                    errorDiv.innerHTML = `<i class="fas fa-exclamation-circle me-2"></i>${error.message}`;
+                    
+                    // Insertar el mensaje de error antes del formulario
+                    const form = document.getElementById('transferForm');
+                    form.parentNode.insertBefore(errorDiv, form);
+                    
+                    // Eliminar el mensaje después de 5 segundos
+                    setTimeout(() => {
+                        errorDiv.remove();
+                    }, 5000);
+                } finally {
+                    // Ocultar spinner
+                    loadingSpinner.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
