@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Historial de Transferencias - Tantuyo Centro Cultural</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #e9d5ff 0%, #6b21a8 100%);
+      min-height: 100vh;
+    }
+    
+    .navbar {
+      background: white;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+      padding: 0.8rem 2rem;
+    }
+
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: transform 0.2s;
+    }
+
+    .navbar-brand:hover {
+      transform: scale(1.02);
+    }
+
+    .brand-logo {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      object-fit: cover;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
+
+    .brand-name {
+      font-weight: 700;
+      font-size: 1.3rem;
+      color: #4a2d8b;
+      margin: 0;
+    }
+
+    .brand-tagline {
+      font-size: 0.8rem;
+      color: #6b7280;
+      margin: 0;
+    }
+
+    /* Estilos para historial */
+    .history-container {
+      max-width: 800px;
+      margin: 30px auto;
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .history-header {
+      text-align: center;
+      margin-bottom: 25px;
+      border-bottom: 2px solid #f0f0f0;
+      padding-bottom: 15px;
+    }
+    
+    .history-header h2 {
+      color: #4a2d8b;
+      font-weight: 700;
+    }
+    
+    .balance-info {
+      background-color: #f8f9fa;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-left: 4px solid #4a2d8b;
+    }
+    
+    .balance-value {
+      font-weight: 700;
+      color: #4a2d8b;
+      font-size: 1.2rem;
+    }
+    
+    .btn-volver {
+      background-color: #f8f9fa;
+      color: #4a2d8b;
+      border: 2px solid #4a2d8b;
+      padding: 10px 25px;
+      border-radius: 50px;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    
+    .btn-volver:hover {
+      background-color: #e9ecef;
+      color: #4a2d8b;
+      transform: translateY(-2px);
+    }
+    
+    .transaction-item {
+      border-radius: 10px;
+      margin-bottom: 15px;
+      padding: 15px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      transition: all 0.2s;
+      border-left: 4px solid transparent;
+    }
+    
+    .transaction-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    
+    .transaction-sent {
+      border-left-color: #dc3545;
+      background-color: #fff5f5;
+    }
+    
+    .transaction-received {
+      border-left-color: #28a745;
+      background-color: #f5fff7;
+    }
+    
+    .transaction-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    
+    .transaction-type {
+      font-weight: 600;
+      font-size: 0.9rem;
+      border-radius: 20px;
+      padding: 3px 12px;
+    }
+    
+    .type-sent {
+      background-color: #dc3545;
+      color: white;
+    }
+    
+    .type-received {
+      background-color: #28a745;
+      color: white;
+    }
+    
+    .transaction-amount {
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+    
+    .transaction-details {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      color: #555;
+    }
+    
+    .transaction-date {
+      font-size: 0.8rem;
+      color: #777;
+    }
+    
+    .empty-history {
+      text-align: center;
+      padding: 40px 0;
+      color: #777;
+    }
+    
+    .empty-history i {
+      font-size: 3rem;
+      color: #ccc;
+      margin-bottom: 20px;
+    }
+    
+    .loading-spinner {
+      text-align: center;
+      padding: 40px 0;
+    }
+
+    /* Media queries para responsive */
+    @media (max-width: 768px) {
+      .navbar {
+        padding: 0.8rem 1rem;
+      }
+      
+      .history-container {
+        margin: 20px 15px;
+      }
+      
+      .transaction-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .transaction-amount {
+        margin-top: 5px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="dashboard.html">
+        <img src="https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F883171863%2F207532730700%2F1%2Foriginal.20241025-055049?w=512&auto=format%2Ccompress&q=75&sharp=10&rect=74%2C4%2C632%2C632&s=5e6a99698de97f7a0c5f18256bcfd582" alt="Logo Tantuyo" class="brand-logo">
+        <div class="brand-text">
+          <span class="brand-name">Tantuyo</span>
+          <span class="brand-tagline">Centro Cultural</span>
+        </div>
+      </a>
+    </div>
+  </nav>
+  
+  <!-- Container principal -->
+  <div class="container">
+    <div class="history-container">
+      <div class="history-header">
+        <i class="fas fa-history fa-3x text-secondary mb-3"></i>
+        <h2>Historial de Transferencias</h2>
+        <p class="text-muted">Visualiza todas tus transacciones</p>
+      </div>
+      
+      <!-- Información del saldo -->
+      <div class="balance-info">
+        <div class="row align-items-center">
+          <div class="col">
+            <span>Tu saldo actual:</span>
+            <div class="balance-value"><i class="fas fa-coins me-2" style="color: gold;"></i><span id="currentBalance">0.00</span> ₮</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Cargando... -->
+      <div class="loading-spinner" id="loadingSpinner">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+        <p class="mt-2">Cargando tu historial...</p>
+      </div>
+      
+      <!-- Lista de transacciones -->
+      <div id="transactionsList" class="mb-4">
+        <!-- Las transacciones se cargarán aquí dinámicamente -->
+      </div>
+      
+      <!-- Historial vacío -->
+      <div class="empty-history" id="emptyHistory" style="display: none">
+        <i class="fas fa-inbox"></i>
+        <h4>No hay transacciones</h4>
+        <p>Aún no has realizado ninguna transferencia</p>
+      </div>
+      
+      <div class="text-center mt-4">
+        <a href="dashboard.html" class="btn btn-volver">
+          <i class="fas fa-arrow-left me-2"></i>Volver al Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/config.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const API_URL = config.API_URL;
+      const currentBalanceEl = document.getElementById('currentBalance');
+      const transactionsList = document.getElementById('transactionsList');
+      const loadingSpinner = document.getElementById('loadingSpinner');
+      const emptyHistory = document.getElementById('emptyHistory');
+      
+      // Verificar si el usuario está autenticado
+      const userId = localStorage.getItem('userId');
+      if (!userId) {
+        window.location.href = 'login.html';
+        return;
+      }
+      
+      // Obtener el saldo actual del usuario
+      const userSaldo = parseFloat(localStorage.getItem('userSaldo') || 0);
+      currentBalanceEl.textContent = userSaldo.toFixed(2);
+      
+      // Cargar historial de transferencias
+      async function loadTransactionHistory() {
+        try {
+          const response = await fetch(`${API_URL}/users/${userId}/transfers`);
+          
+          if (!response.ok) {
+            throw new Error('Error al cargar historial');
+          }
+          
+          const data = await response.json();
+          
+          // Ocultar el spinner
+          loadingSpinner.style.display = 'none';
+          
+          // Mostrar mensaje si no hay transacciones
+          if (data.count === 0) {
+            emptyHistory.style.display = 'block';
+            return;
+          }
+          
+          // Renderizar cada transacción
+          data.transfers.forEach(transaction => {
+            const isSent = transaction.type === 'sent';
+            
+            const formattedDate = new Date(transaction.date).toLocaleString('es-MX', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            });
+            
+            const transactionElement = document.createElement('div');
+            transactionElement.className = `transaction-item ${isSent ? 'transaction-sent' : 'transaction-received'}`;
+            
+            transactionElement.innerHTML = `
+              <div class="transaction-header">
+                <span class="transaction-type ${isSent ? 'type-sent' : 'type-received'}">
+                  <i class="fas ${isSent ? 'fa-arrow-up' : 'fa-arrow-down'} me-1"></i>
+                  ${isSent ? 'Enviado' : 'Recibido'}
+                </span>
+                <span class="transaction-amount">${isSent ? '-' : '+'} ${transaction.amount.toFixed(2)} ₮</span>
+              </div>
+              <div class="transaction-details">
+                <div>
+                  <strong>${isSent ? 'Para:' : 'De:'}</strong> 
+                  ${isSent ? transaction.toName : transaction.fromName}
+                </div>
+                ${isSent ? 
+                  `<div><strong>Teléfono:</strong> ${transaction.toPhone}</div>` : 
+                  ''}
+                <div><strong>ID Transacción:</strong> ${transaction.id}</div>
+              </div>
+              <div class="transaction-date mt-2">${formattedDate}</div>
+            `;
+            
+            transactionsList.appendChild(transactionElement);
+          });
+          
+        } catch (error) {
+          console.error('Error:', error);
+          loadingSpinner.style.display = 'none';
+          
+          // Mostrar error amigable
+          transactionsList.innerHTML = `
+            <div class="alert alert-danger">
+              <i class="fas fa-exclamation-circle me-2"></i>
+              No se pudo cargar el historial. Por favor, inténtalo de nuevo más tarde.
+            </div>
+          `;
+        }
+      }
+      
+      // Cargar historial
+      loadTransactionHistory();
+    });
+  </script>
+</body>
+
+</html>
