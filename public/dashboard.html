@@ -75,6 +75,7 @@
       box-shadow: 0 3px 6px rgba(0,0,0,0.1);
       margin-right: 20px;
       transition: all 0.2s;
+      cursor: pointer;
     }
 
     .balance-display:hover {
@@ -88,6 +89,37 @@
 
     .balance-value {
       letter-spacing: 0.5px;
+    }
+
+    /* Menú desplegable para el saldo */
+    .balance-dropdown {
+      position: relative;
+    }
+
+    .balance-menu {
+      width: 180px;
+      padding: 0;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+      border: none;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .balance-item {
+      padding: 0.8rem 1.2rem;
+      transition: background-color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .balance-item:hover {
+      background-color: #f0f4f8;
+    }
+
+    .balance-item i {
+      color: #4a2d8b;
     }
 
     .navbar-items {
@@ -267,10 +299,26 @@
           </div>
         </a>
         <div class="navbar-items ms-auto">
-          <!-- Indicador de Saldo -->
-          <div class="balance-display">
-            <i class="fas fa-coins"></i>
-            <span class="balance-value" id="userBalance">0.00 ₮</span>
+          <!-- Indicador de Saldo con Menú Desplegable -->
+          <div class="balance-dropdown">
+            <div class="balance-display" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fas fa-coins"></i>
+              <span class="balance-value" id="userBalance">0.00 ₮</span>
+            </div>
+            <ul class="dropdown-menu balance-menu">
+              <li>
+                <a class="balance-item" href="Transferencias.html">
+                  <i class="fas fa-exchange-alt"></i>
+                  <span>Transferir</span>
+                </a>
+              </li>
+              <li>
+                <a class="balance-item" href="Historial.html">
+                  <i class="fas fa-history"></i>
+                  <span>Historial</span>
+                </a>
+              </li>
+            </ul>
           </div>
           
           <div class="profile-dropdown" id="profileDropdown">
@@ -423,6 +471,9 @@
       // Mostrar saldo con formato
       const saldo = parseFloat(usuario.saldo || 0).toFixed(2);
       document.getElementById("userBalance").textContent = `${saldo} ₮`;
+
+      // Guardar saldo en localStorage para usarlo en transferencias
+      localStorage.setItem("userSaldo", usuario.saldo || 0);
     }
 
     function cerrarSesion() {
