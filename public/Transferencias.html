@@ -38,7 +38,7 @@
             height: 45px;
             border-radius: 50%;
             object-fit: cover;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
         .brand-text {
@@ -118,6 +118,10 @@
             color: #4a2d8b;
             font-size: 1.2rem;
         }
+        
+        .text-danger {
+            color: #dc3545 !important;
+        }
 
         .btn-transferir {
             background-color: #4a2d8b;
@@ -131,7 +135,7 @@
         .btn-transferir:hover {
             background-color: #6b21a8;
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
 
         .btn-volver {
@@ -245,9 +249,14 @@
                             required>
                         <span class="input-group-text">₮</span>
                     </div>
-                    <div class="form-text">La cantidad mínima de transferencia es 0.01 ₮</div>
-                    <div class="error-message" id="amountError">No tienes saldo suficiente para esta transferencia.
-                    </div>
+                    <div class="form-text">La cantidad mínima de transferencia es 0.01 ₮. Puedes transferir incluso si no tienes saldo suficiente.</div>
+                    <div class="error-message" id="amountError">La cantidad debe ser mayor a cero.</div>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="concept">Concepto (opcional)</label>
+                    <input type="text" class="form-control" id="concept" placeholder="Ej: Pago de evento, préstamo, etc." maxlength="100">
+                    <div class="form-text">Puedes agregar un motivo o concepto para esta transferencia</div>
                 </div>
 
                 <div class="row mb-3 mt-4">
@@ -292,11 +301,19 @@
             const userSaldo = parseFloat(localStorage.getItem('userSaldo') || 0);
             currentBalanceEl.textContent = userSaldo.toFixed(2);
             
+            // Resaltar saldo negativo con color rojo
+            if (userSaldo < 0) {
+                currentBalanceEl.classList.add('text-danger');
+            } else {
+                currentBalanceEl.classList.remove('text-danger');
+            }
+            
             // Variable global para mantener el saldo actualizado
             window.userSaldo = userSaldo;
 
             // Inicializar el selector internacional de teléfono
-            const phoneInput = window.intlTelInput(document.querySelector("#phoneNumber"), {
+            const phoneNumberInput = document.getElementById('phoneNumber');
+            const phoneInput = window.intlTelInput(phoneNumberInput, {
                 preferredCountries: ["mx", "us", "es"],
                 utilsScript: "https://cdn.jsdelivr.net/npm/intl-tel-input@18.2.1/build/js/utils.js",
                 separateDialCode: true,
@@ -307,8 +324,6 @@
             });
             
             // Limitar el input a sólo 10 dígitos numéricos
-            const phoneNumberInput = document.getElementById('phoneNumber');
-            
             phoneNumberInput.addEventListener('input', function(e) {
                 // Eliminar cualquier caracter que no sea dígito
                 this.value = this.value.replace(/\D/g, '');
@@ -377,13 +392,11 @@
                 }
             }
 
-            // Validar cantidad
+            // Validar cantidad (solo verifica que sea mayor a cero)
             function validateAmount() {
                 const amount = parseFloat(amountInput.value);
-                if (isNaN(amount) || amount <= 0) return false;
-
-                // Usar window.userSaldo para que siempre esté actualizado
-                if (amount > window.userSaldo) {
+                if (isNaN(amount) || amount <= 0) {
+                    amountError.textContent = "La cantidad debe ser mayor a cero.";
                     amountError.style.display = 'block';
                     return false;
                 } else {
@@ -444,12 +457,7 @@
 
                 const amount = parseFloat(amountInput.value);
                 const phone = phoneInput.getNumber();
-                
-                // Validar que el monto no exceda el saldo actual
-                if (amount > window.userSaldo) {
-                    amountError.style.display = 'block';
-                    return;
-                }
+                const concept = document.getElementById('concept').value.trim();
 
                 try {
                     // Crear objeto de transferencia
@@ -457,6 +465,7 @@
                         from: userId,
                         toPhone: phone,
                         amount: amount,
+                        concept: concept,
                         date: new Date().toISOString()
                     };
 
@@ -473,11 +482,21 @@
                         const errorData = await response.json();
                         throw new Error(errorData.mensaje || 'Error en la transferencia');
                     }
+                    
+                    // Obtener respuesta del servidor
+                    const responseData = await response.json();
 
-                    // Actualizar saldo en localStorage
-                    const newSaldo = userSaldo - amount;
+                    // Actualizar saldo en localStorage con el saldo actualizado del servidor
+                    const newSaldo = responseData.fromNewBalance;
                     localStorage.setItem('userSaldo', newSaldo);
                     currentBalanceEl.textContent = newSaldo.toFixed(2);
+                    
+                    // Resaltar saldo negativo si es necesario
+                    if (newSaldo < 0) {
+                        currentBalanceEl.classList.add('text-danger');
+                    } else {
+                        currentBalanceEl.classList.remove('text-danger');
+                    }
                     
                     // Actualizar la variable userSaldo para futuras transferencias
                     window.userSaldo = newSaldo;

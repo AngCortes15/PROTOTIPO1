@@ -95,6 +95,10 @@
       font-size: 1.2rem;
     }
     
+    .text-danger {
+      color: #dc3545 !important;
+    }
+    
     .btn-volver {
       background-color: #f8f9fa;
       color: #4a2d8b;
@@ -297,6 +301,13 @@
       const userSaldo = parseFloat(localStorage.getItem('userSaldo') || 0);
       currentBalanceEl.textContent = userSaldo.toFixed(2);
       
+      // Destacar cuando el saldo es negativo
+      if (userSaldo < 0) {
+        currentBalanceEl.classList.add('text-danger');
+      } else {
+        currentBalanceEl.classList.remove('text-danger');
+      }
+      
       // Cargar historial de transferencias
       async function loadTransactionHistory() {
         try {
@@ -329,6 +340,10 @@
               minute: '2-digit'
             });
             
+            // Verificar si hay concepto para mostrar
+            const conceptHtml = transaction.concept ? 
+              `<div><strong>Concepto:</strong> ${transaction.concept}</div>` : '';
+            
             const transactionElement = document.createElement('div');
             transactionElement.className = `transaction-item ${isSent ? 'transaction-sent' : 'transaction-received'}`;
             
@@ -348,6 +363,7 @@
                 ${isSent ? 
                   `<div><strong>Teléfono:</strong> ${transaction.toPhone}</div>` : 
                   ''}
+                ${conceptHtml}
                 <div><strong>ID Transacción:</strong> ${transaction.id}</div>
               </div>
               <div class="transaction-date mt-2">${formattedDate}</div>

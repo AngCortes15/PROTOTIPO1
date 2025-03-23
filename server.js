@@ -603,9 +603,10 @@ app.get("/api/users/check-phone/:phone", async (req, res) => {
   }
 });
 
+// Endpoint para realizar transferencias entre usuarios
 app.post("/api/transfers", async (req, res) => {
   try {
-    const { from, toPhone, amount, date } = req.body;
+    const { from, toPhone, amount, concept, date } = req.body;
     
     if (!from || !toPhone || !amount || amount <= 0) {
       return res.status(400).json({
@@ -653,19 +654,14 @@ app.post("/api/transfers", async (req, res) => {
       });
     }
 
-    // 4. Verificar saldo suficiente del remitente
+    // 4. Obtener saldo actual del remitente (sin validar si es suficiente)
     const fromBalance = fromUserResult.Item.saldo !== undefined ? fromUserResult.Item.saldo : 0;
     const amountNum = parseFloat(amount);
 
-    if (fromBalance < amountNum) {
-      return res.status(400).json({
-        mensaje: "Saldo insuficiente para realizar la transferencia",
-        saldoActual: fromBalance
-      });
-    }
+    // Ya no validamos si el saldo es suficiente, permitimos saldos negativos
 
     // Usar la tabla Transfers (con mayúscula)
-    const TABLE_TRANSFERS = "Transfers"; // Define la tabla para transferencias
+    const TABLE_TRANSFERS = "Transfers";
 
     // 5. Crear registro de transferencia
     const transferId = `TR-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
@@ -677,6 +673,7 @@ app.post("/api/transfers", async (req, res) => {
       toName: `${toUser.nombres} ${toUser.apellidos}`,
       toPhone: toPhone,
       amount: amountNum,
+      concept: concept || "", 
       date: date || new Date().toISOString(),
       status: "completed"
     };
@@ -735,7 +732,8 @@ app.post("/api/transfers", async (req, res) => {
       transferId: transferId,
       fromNewBalance: fromUpdate.Attributes.saldo,
       toNewBalance: toUpdate.Attributes.saldo,
-      amount: amountNum
+      amount: amountNum,
+      concept: concept || ""
     });
 
   } catch (error) {
