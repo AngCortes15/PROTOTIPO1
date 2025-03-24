@@ -76,14 +76,12 @@
           </div>
 
           <div class="mb-3">
-            <label for="instagram" class="form-label">Instagram</label>
+            <label for="instagram" class="form-label">Instagram (opcional)</label>
             <div class="input-group">
               <span class="input-group-text">@</span>
-              <input type="text" class="form-control" id="instagram" required />
+              <input type="text" class="form-control" id="instagram" />
             </div>
-            <div class="invalid-feedback">
-              Por favor ingresa tu usuario de Instagram
-            </div>
+            <small class="text-muted">Puedes dejar este campo vacío si no tienes Instagram</small>
           </div>
 
           <div class="mb-3">
@@ -231,7 +229,7 @@
               apellidos: document.getElementById("apellidos").value,
               whatsapp: whatsapp,
               email: email,
-              instagram: document.getElementById("instagram").value,
+              instagram: document.getElementById("instagram").value || "", // Permitir valor vacío
               edad: document.getElementById("edad").value,
             };
 

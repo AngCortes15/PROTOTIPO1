@@ -255,10 +255,11 @@ app.post("/api/users", async (req, res) => {
   try {
     const { nombres, apellidos, whatsapp, email, instagram, edad } = req.body;
 
-    if (!nombres || !apellidos || !whatsapp || !email || !instagram || !edad) {
+    // Modificamos la validación para no requerir el campo instagram
+    if (!nombres || !apellidos || !whatsapp || !email || !edad) {
       return res
         .status(400)
-        .json({ mensaje: "Todos los campos son requeridos" });
+        .json({ mensaje: "Todos los campos obligatorios son requeridos" });
     }
 
     // Verificar si el email ya existe
@@ -283,7 +284,7 @@ app.post("/api/users", async (req, res) => {
       apellidos,
       whatsapp,
       email,
-      instagram,
+      instagram: instagram || "", // Usar cadena vacía si no se proporciona
       edad: Number(edad),
       fechaRegistro: new Date().toISOString(),
       saldo: 20.00, // Saldo inicial al registrarse
