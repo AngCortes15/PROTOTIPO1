@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Órdenes - Tantuyo Centro Cultural</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #1a73e8;
+            --secondary-color: #f0f4f8;
+            --accent-color: #8c38d3;
+            --green-button: #2e7d32;
+            --green-button-hover: #1b5e20;
+            --purple-button: #9c27b0;
+            --purple-button-hover: #7b1fa2;
+            --blue-button: #03a9f4;
+            --blue-button-hover: #0288d1;
+            --text-dark: #202124;
+            --text-light: #5f6368;
+            --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            --border-radius: 8px;
+            --status-pending: #ffa000;
+            --status-pending-bg: #fff9e6;
+            --status-completed: #2e7d32;
+            --status-completed-bg: #eaf7f0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f4f8;
+            color: var(--text-dark);
+        }
+
+        /* Navbar styles */
+        .navbar {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+            padding: 0.8rem 2rem;
+            margin-bottom: 20px;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: transform 0.2s;
+        }
+
+        .navbar-brand:hover {
+            transform: scale(1.02);
+        }
+
+        .brand-logo {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.1;
+        }
+
+        .brand-name {
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: #4a2d8b;
+            margin: 0;
+        }
+
+        .brand-tagline {
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin: 0;
+        }
+
+        .back-button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #f3f4f6;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            color: #4b5563;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .back-button:hover {
+            background-color: #e5e7eb;
+            transform: translateX(-2px);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header section */
+        .header {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .header-title i {
+            font-size: 28px;
+            color: var(--primary-color);
+        }
+
+        /* Filtros y buscador */
+        .filters-container {
+            background: white;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            flex: 1;
+            max-width: 400px;
+            background-color: #f5f5f5;
+            border-radius: 30px;
+            padding: 0 15px;
+            transition: all 0.3s;
+        }
+
+        .search-box:focus-within {
+            box-shadow: 0 0 0 2px var(--primary-color);
+        }
+
+        .search-box input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 10px;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .search-box i {
+            color: var(--text-light);
+        }
+
+        .filter-select {
+            padding: 10px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            background-color: white;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            color: var(--text-dark);
+            outline: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-select:focus {
+            border-color: var(--primary-color);
+        }
+
+        /* Order cards */
+        .orders-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .order-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            position: relative;
+            border-left: 4px solid transparent;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .order-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Estados de órdenes */
+        .order-card.pending {
+            border-left-color: var(--status-pending);
+            background-color: var(--status-pending-bg);
+        }
+
+        .order-card.completed {
+            border-left-color: var(--status-completed);
+            background-color: var(--status-completed-bg);
+        }
+
+        .status-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status-badge.pending {
+            background-color: var(--status-pending);
+            color: white;
+        }
+
+        .status-badge.completed {
+            background-color: var(--status-completed);
+            color: white;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding-right: 90px;
+            /* Espacio para el badge */
+        }
+
+        .order-id {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .order-date {
+            font-size: 14px;
+            color: var(--text-light);
+        }
+
+        .order-details {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .detail-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .detail-label {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-bottom: 3px;
+        }
+
+        .detail-value {
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .order-products {
+            margin-top: 15px;
+            border-top: 1px dashed #e0e0e0;
+            padding-top: 15px;
+        }
+
+        .product-heading {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: 600;
+            font-size: 15px;
+            color: var(--text-light);
+            padding: 0 10px;
+        }
+
+        .product-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 10px;
+            border-radius: 4px;
+            background-color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 5px;
+        }
+
+        .product-item:nth-child(odd) {
+            background-color: rgba(245, 245, 245, 0.6);
+        }
+
+        .product-name {
+            flex: 2;
+            font-size: 14px;
+        }
+
+        .product-price {
+            flex: 1;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .product-quantity {
+            flex: 0.5;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .product-total {
+            flex: 1;
+            text-align: right;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .order-total {
+            margin-top: 15px;
+            text-align: right;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        /* Selector de órdenes */
+        .order-selection {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .order-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        /* Acciones */
+        .actions-container {
+            position: sticky;
+            bottom: 20px;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 15px 20px;
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .selected-count {
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            transition: all 0.3s;
+        }
+
+        .btn-confirm {
+            background-color: var(--green-button);
+            color: white;
+        }
+
+        .btn-confirm:hover {
+            background-color: var(--green-button-hover);
+        }
+
+        .btn-confirm:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        /* Estado vacío */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .empty-state i {
+            font-size: 60px;
+            color: #dadce0;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            margin: 0 0 10px 0;
+            font-size: 20px;
+            color: var(--text-dark);
+        }
+
+        .empty-state p {
+            margin: 0 0 25px 0;
+            color: var(--text-light);
+        }
+
+        /* Loader */
+        .loader-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0.8rem 1rem;
+            }
+
+            .filters-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-box {
+                max-width: 100%;
+            }
+
+            .order-header {
+                flex-direction: column;
+                gap: 5px;
+                padding-right: 0;
+                padding-bottom: 40px;
+                /* Espacio para el badge */
+            }
+
+            .status-badge {
+                top: auto;
+                bottom: 15px;
+                right: 15px;
+            }
+
+            .order-details {
+                flex-direction: column;
+            }
+
+            .product-item {
+                flex-wrap: wrap;
+            }
+
+            .product-name {
+                flex: 1 0 100%;
+                margin-bottom: 5px;
+                font-weight: 500;
+            }
+
+            .product-price,
+            .product-quantity,
+            .product-total {
+                flex: 1;
+            }
+
+            .product-total {
+                text-align: right;
+            }
+
+            .actions-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .action-buttons {
+                width: 100%;
+            }
+
+            .btn {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar con logo y botón de regreso -->
+    <nav class="navbar">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="dashboard.html">
+                <img src="https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F883171863%2F207532730700%2F1%2Foriginal.20241025-055049?w=512&auto=format%2Ccompress&q=75&sharp=10&rect=74%2C4%2C632%2C632&s=5e6a99698de97f7a0c5f18256bcfd582"
+                    alt="Logo Tantuyo" class="brand-logo">
+                <div class="brand-text">
+                    <span class="brand-name">Tantuyo</span>
+                    <span class="brand-tagline">Centro Cultural</span>
+                </div>
+            </a>
+            <a href="Eventos.html" class="back-button">
+                <i class="fas fa-arrow-left"></i>
+                <span>Volver a Eventos</span>
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Header section -->
+        <div class="header">
+            <div class="header-title">
+                <i class="fas fa-shopping-basket"></i>
+                <span>Mis Órdenes</span>
+            </div>
+        </div>
+
+        <!-- Filtros y buscador -->
+        <div class="filters-container">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Buscar en órdenes...">
+            </div>
+            <select id="eventoFilter" class="filter-select">
+                <option value="">Todos los eventos</option>
+                <!-- Se cargarán dinámicamente -->
+            </select>
+            <select id="statusFilter" class="filter-select">
+                <option value="">Todos los estados</option>
+                <option value="pendiente">Pendientes</option>
+                <option value="completado">Entregados</option>
+            </select>
+        </div>
+
+        <!-- Contenedor de órdenes -->
+        <div class="orders-container" id="ordersContainer">
+            <!-- Órdenes se cargarán dinámicamente -->
+            <div class="loader-container">
+                <div class="loader"></div>
+            </div>
+        </div>
+
+        <!-- Panel de acciones para confirmar recepciones -->
+        <div class="actions-container" id="actionsContainer" style="display: none;">
+            <div class="selected-count">
+                <span id="selectedCount">0</span> órdenes seleccionadas
+            </div>
+            <div class="action-buttons">
+                <button id="confirmOrdersBtn" class="btn btn-confirm" disabled>
+                    <i class="fas fa-check-circle"></i> Confirmar Recepción
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script>
+        const API_URL = config.API_URL;
+        let currentUser = null;
+        let allOrders = [];
+        let selectedOrderIds = [];
+        let filteredOrders = [];
+
+        // Función para formatear fecha
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('es-ES', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // Función para obtener parámetros de la URL
+        function getUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                eventoId: params.get('eventoId'),
+                eventoNombre: params.get('eventoNombre')
+            };
+        }
+
+        // Función para verificar sesión
+        function checkSession() {
+            const userId = localStorage.getItem('userId');
+            if (!userId) {
+                alert('Debes iniciar sesión para ver tus órdenes');
+                window.location.href = 'login.html';
+                return null;
+            }
+            return userId;
+        }
+
+        // Función para cargar las órdenes del usuario
+        async function loadOrders() {
+            try {
+                // Verificar sesión
+                const userId = checkSession();
+                if (!userId) return;
+
+                currentUser = userId;
+
+                // Mostrar loader
+                document.getElementById('ordersContainer').innerHTML = `
+                    <div class="loader-container">
+                        <div class="loader"></div>
+                    </div>
+                `;
+
+                // Obtener parámetros URL por si venimos de un evento específico
+                const urlParams = getUrlParams();
+
+                // Obtener todas las órdenes del usuario
+                const response = await fetch(`${API_URL}/users/${userId}/orders`);
+
+                if (!response.ok) {
+                    throw new Error('Error al obtener órdenes');
+                }
+
+                allOrders = await response.json();
+
+                // Filtrar por eventoId si es necesario
+                if (urlParams.eventoId) {
+                    allOrders = allOrders.filter(order => order.eventoId === urlParams.eventoId);
+                }
+
+                // Cargar eventos para el filtro
+                loadEventosFilter(allOrders);
+
+                // Mostrar órdenes
+                renderOrders(allOrders);
+
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('ordersContainer').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <h3>Error al cargar las órdenes</h3>
+                        <p>${error.message || 'Ocurrió un error inesperado'}</p>
+                        <button class="btn btn-primary" onclick="loadOrders()">
+                            <i class="fas fa-sync"></i> Reintentar
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // Función para cargar el filtro de eventos
+        function loadEventosFilter(orders) {
+            // Obtener eventos únicos
+            const eventos = [...new Set(orders.map(order => order.eventoId))];
+
+            // Obtener select
+            const selectElement = document.getElementById('eventoFilter');
+
+            // Si no hay eventos, deshabilitar el select
+            if (eventos.length === 0) {
+                selectElement.disabled = true;
+                return;
+            }
+
+            // Agrupar por nombre de evento
+            const eventosUnicos = {};
+            orders.forEach(order => {
+                if (!eventosUnicos[order.eventoId]) {
+                    eventosUnicos[order.eventoId] = order.eventoNombre;
+                }
+            });
+
+            // Crear opciones
+            let optionsHTML = '<option value="">Todos los eventos</option>';
+
+            for (const [eventoId, eventoNombre] of Object.entries(eventosUnicos)) {
+                optionsHTML += `<option value="${eventoId}">${eventoNombre}</option>`;
+            }
+
+            selectElement.innerHTML = optionsHTML;
+
+            // Preseleccionar evento si viene por URL
+            const urlParams = getUrlParams();
+            if (urlParams.eventoId) {
+                selectElement.value = urlParams.eventoId;
+            }
+        }
+
+        // Función para añadir event listeners a los checkboxes
+        function addCheckboxListeners() {
+            const checkboxes = document.querySelectorAll('.order-checkbox');
+
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function () {
+                    const orderId = this.getAttribute('data-id');
+
+                    if (this.checked) {
+                        // Añadir a seleccionados si no está ya
+                        if (!selectedOrderIds.includes(orderId)) {
+                            selectedOrderIds.push(orderId);
+                        }
+                    } else {
+                        // Eliminar de seleccionados
+                        selectedOrderIds = selectedOrderIds.filter(id => id !== orderId);
+                    }
+
+                    // Actualizar contador y estado del botón
+                    updateSelectedCount();
+                });
+            });
+        }
+
+        // Actualizar contador de órdenes seleccionadas
+        function updateSelectedCount() {
+            const countElement = document.getElementById('selectedCount');
+            const confirmButton = document.getElementById('confirmOrdersBtn');
+
+            countElement.textContent = selectedOrderIds.length;
+
+            // Habilitar o deshabilitar botón según si hay selecciones
+            confirmButton.disabled = selectedOrderIds.length === 0;
+        }
+
+        // Función para confirmar recepción de órdenes
+        async function confirmOrdersReceived() {
+            try {
+                if (selectedOrderIds.length === 0) return;
+
+                // Verificar sesión
+                const userId = checkSession();
+                if (!userId) return;
+
+                // Confirmar con el usuario
+                if (!confirm(`¿Confirmas que has recibido ${selectedOrderIds.length} ${selectedOrderIds.length === 1 ? 'orden' : 'órdenes'}?`)) {
+                    return;
+                }
+
+                // Deshabilitar botón mientras se procesa
+                const confirmButton = document.getElementById('confirmOrdersBtn');
+                confirmButton.disabled = true;
+                confirmButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+
+                // Crear un array de promesas para confirmar cada orden
+                const confirmPromises = selectedOrderIds.map(orderId => {
+                    return fetch(`${API_URL}/orders/${orderId}/confirm`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            userId: userId,
+                            recibido: true
+                        })
+                    }).then(response => {
+                        if (!response.ok) {
+                            throw new Error(`Error al confirmar orden ${orderId}`);
+                        }
+                        return response.json();
+                    });
+                });
+
+                // Ejecutar todas las confirmaciones
+                await Promise.all(confirmPromises);
+
+                // Mostrar mensaje de éxito
+                alert('¡Órdenes confirmadas exitosamente!');
+
+                // Limpiar selecciones
+                selectedOrderIds = [];
+
+                // Recargar órdenes
+                loadOrders();
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert(`Error al confirmar órdenes: ${error.message}`);
+
+                // Restaurar botón
+                const confirmButton = document.getElementById('confirmOrdersBtn');
+                confirmButton.disabled = false;
+                confirmButton.innerHTML = '<i class="fas fa-check-circle"></i> Confirmar Recepción';
+            }
+        }
+
+        // Función para filtrar órdenes
+        function filterOrders() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const eventoId = document.getElementById('eventoFilter').value;
+            const status = document.getElementById('statusFilter').value;
+
+            // Filtrar por búsqueda, evento y estado
+            filteredOrders = allOrders.filter(order => {
+                // Filtro por texto de búsqueda (en ID, nombre de evento o productos)
+                const searchMatch = searchTerm === '' ||
+                    order.id.toLowerCase().includes(searchTerm) ||
+                    order.eventoNombre.toLowerCase().includes(searchTerm) ||
+                    order.productos.some(prod => prod.descripcion.toLowerCase().includes(searchTerm));
+
+                // Filtro por evento
+                const eventoMatch = eventoId === '' || order.eventoId === eventoId;
+
+                // Filtro por estado
+                const statusMatch = status === '' || order.estado === status;
+
+                return searchMatch && eventoMatch && statusMatch;
+            });
+
+            // Renderizar resultados filtrados
+            renderOrders(filteredOrders);
+        }
+
+        // Función para renderizar órdenes
+        // Función para renderizar órdenes - VERSIÓN CORREGIDA
+        function renderOrders(orders) {
+            const container = document.getElementById('ordersContainer');
+
+            // Si no hay órdenes, mostrar mensaje
+            if (!orders || orders.length === 0) {
+                container.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-shopping-basket"></i>
+                <h3>Aún no tienes órdenes</h3>
+                <p>Cuando realices pedidos en los eventos, aparecerán aquí.</p>
+                <a href="Eventos.html" class="btn btn-primary">
+                    <i class="fas fa-calendar-alt"></i> Explorar Eventos
+                </a>
+            </div>
+        `;
+                // Ocultar panel de acciones
+                document.getElementById('actionsContainer').style.display = 'none';
+                return;
+            }
+
+            // Ordenar por fecha (más recientes primero)
+            orders.sort((a, b) => new Date(b.fechaCreacion) - new Date(a.fechaCreacion));
+
+            let html = '';
+
+            orders.forEach(order => {
+                // Determinar clase y texto según estado
+                const estadoClass = order.estado === 'pendiente' ? 'pending' : 'completed';
+                const estadoTexto = order.estado === 'pendiente' ? 'Pendiente' : 'Entregado';
+                const estadoIcon = order.estado === 'pendiente' ? 'fa-clock' : 'fa-check-circle';
+
+                // Calcular totales de la orden
+                const metodoPago = order.metodoPago === 'tuyos' ? 'Tuyos' : 'MXN';
+                const total = metodoPago === 'Tuyos' ? order.totalTuyos : order.totalMXN;
+
+                html += `
+            <div class="order-card ${estadoClass}" data-order-id="${order.id}" data-order-status="${order.estado}">
+                ${order.estado === 'pendiente' ? `
+                    <div class="order-selection">
+                        <input type="checkbox" class="order-checkbox" data-id="${order.id}">
+                        <span>Seleccionar para confirmar recepción</span>
+                    </div>
+                ` : ''}
+                
+                <div class="status-badge ${estadoClass}">
+                    <i class="fas ${estadoIcon}"></i>
+                    ${estadoTexto}
+                </div>
+                
+                <div class="order-header">
+                    <div class="order-id">Orden #${order.id.split('-')[1]}</div>
+                    <div class="order-date">
+                        <i class="far fa-calendar-alt"></i>
+                        ${formatDate(order.fechaCreacion)}
+                    </div>
+                </div>
+                
+                <div class="order-details">
+                    <div class="detail-group">
+                        <div class="detail-label">Evento</div>
+                        <div class="detail-value">${order.eventoNombre}</div>
+                    </div>
+                    <div class="detail-group">
+                        <div class="detail-label">Método de Pago</div>
+                        <div class="detail-value">${metodoPago}</div>
+                    </div>
+                    <div class="detail-group">
+                        <div class="detail-label">Total</div>
+                        <div class="detail-value">
+                            ${metodoPago === 'Tuyos' ? `${total.toFixed(2)} Tuyos` : `$${total.toFixed(2)} MXN`}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="order-products">
+                    <div class="product-heading">
+                        <div class="product-name">Producto</div>
+                        <div class="product-price">Precio</div>
+                        <div class="product-quantity">Cant.</div>
+                        <div class="product-total">Total</div>
+                    </div>
+                    
+                    ${order.productos.map(producto => {
+                    const precioUnitario = metodoPago === 'Tuyos' ? producto.precioTuyos : producto.precioMXN;
+                    const subtotal = precioUnitario * producto.quantity;
+
+                    return `
+                            <div class="product-item">
+                                <div class="product-name">${producto.descripcion}</div>
+                                <div class="product-price">
+                                    ${metodoPago === 'Tuyos' ?
+                            `${precioUnitario.toFixed(2)} Tuyos` :
+                            `$${precioUnitario.toFixed(2)}`}
+                                </div>
+                                <div class="product-quantity">${producto.quantity}</div>
+                                <div class="product-total">
+                                    ${metodoPago === 'Tuyos' ?
+                            `${subtotal.toFixed(2)} Tuyos` :
+                            `$${subtotal.toFixed(2)}`}
+                                </div>
+                            </div>
+                        `;
+                }).join('')}
+                    
+                    <div class="order-total">
+                        Total: ${metodoPago === 'Tuyos' ?
+                        `${total.toFixed(2)} Tuyos` :
+                        `$${total.toFixed(2)} MXN`}
+                    </div>
+                </div>
+            </div>
+        `;
+            });
+
+            container.innerHTML = html;
+
+            // Mostrar panel de acciones si hay órdenes pendientes
+            const hasPendingOrders = orders.some(order => order.estado === 'pendiente');
+            document.getElementById('actionsContainer').style.display = hasPendingOrders ? 'flex' : 'none';
+
+            // Añadir event listeners a los checkboxes
+            addCheckboxListeners();
+        }
+
+        // Inicializar eventos cuando carga la página
+        document.addEventListener('DOMContentLoaded', function () {
+            // Cargar órdenes
+            loadOrders();
+
+            // Event listener para el botón de confirmar
+            document.getElementById('confirmOrdersBtn').addEventListener('click', confirmOrdersReceived);
+
+            // Event listeners para filtros
+            document.getElementById('searchInput').addEventListener('input', filterOrders);
+            document.getElementById('eventoFilter').addEventListener('change', filterOrders);
+            document.getElementById('statusFilter').addEventListener('change', filterOrders);
+        });
+    </script>
+</body>
+
+</html>

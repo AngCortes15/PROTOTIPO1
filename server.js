@@ -19,7 +19,8 @@ const dynamoDB = new AWS.DynamoDB.DocumentClient();
 const TABLE_ITEMS = process.env.DYNAMODB_TABLE_ITEMS;
 const TABLE_USERS = process.env.DYNAMODB_TABLE_USERS;
 const TABLE_EVENTOS = process.env.DYNAMODB_TABLE_EVENTOS;
-
+const TABLE_ORDERS = process.env.DYNAMODB_TABLE_ORDERS;
+const TABLE_MENUS = process.env.DYNAMODB_TABLE_MENUS;
 // console.log('Configuración AWS:', {
 //     region: AWS.config.region,
 //     hasAccessKey: !!process.env.AWS_ACCESS_KEY_ID,
@@ -1274,6 +1275,426 @@ function generateInscripcionId() {
   return `INSC_${timestamp}_${randomStr}`;
 }
 
+// Obtener menú por ID de evento
+app.get("/api/eventos/:eventoId/menu", async (req, res) => {
+  try {
+    const eventoId = req.params.eventoId;
+    
+    const params = {
+      TableName: TABLE_MENUS,
+      FilterExpression: "eventoId = :eventoId",
+      ExpressionAttributeValues: {
+        ":eventoId": eventoId
+      }
+    };
+
+    const data = await dynamoDB.scan(params).promise();
+    
+    if (!data.Items || data.Items.length === 0) {
+      return res.status(404).json({
+        mensaje: "No se encontró un menú para este evento",
+        exists: false
+      });
+    }
+    
+    res.json(data.Items[0]);
+  } catch (error) {
+    console.error("Error al obtener menú de evento:", error);
+    res.status(500).json({
+      mensaje: "Error al obtener el menú",
+      error: error.message
+    });
+  }
+});
+
+// Crear o actualizar menú para un evento
+app.post("/api/eventos/:eventoId/menu", async (req, res) => {
+  try {
+    const eventoId = req.params.eventoId;
+    const { productos } = req.body;
+    
+    if (!Array.isArray(productos) || productos.length === 0) {
+      return res.status(400).json({
+        mensaje: "Se requiere un arreglo de productos válido"
+      });
+    }
+    
+    // Verificar que el evento existe
+    const eventoParams = {
+      TableName: TABLE_EVENTOS,
+      Key: {
+        id: eventoId
+      }
+    };
+    
+    const eventoResult = await dynamoDB.get(eventoParams).promise();
+    if (!eventoResult.Item) {
+      return res.status(404).json({
+        mensaje: "El evento especificado no existe"
+      });
+    }
+    
+    // Formatear y validar los productos
+    const productosFormateados = productos.map(producto => {
+      // Generar código único si no se proporciona
+      const codigo = producto.codigo || `PROD-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+      
+      return {
+        codigo,
+        descripcion: producto.descripcion || '',
+        precioMXN: parseFloat(producto.precioMXN || 0),
+        precioTuyos: parseFloat(producto.precioTuyos || 0),
+        categoria: producto.categoria || 'General',
+        disponible: producto.disponible !== false // Por defecto disponible
+      };
+    });
+    
+    // Crear o actualizar el menú
+    const menuId = `MENU-${eventoId}`;
+    
+    const menuItem = {
+      id: menuId,
+      eventoId: eventoId,
+      fechaCreacion: new Date().toISOString(),
+      fechaActualizacion: new Date().toISOString(),
+      productos: productosFormateados
+    };
+    
+    const menuParams = {
+      TableName: TABLE_MENUS,
+      Item: menuItem
+    };
+    
+    await dynamoDB.put(menuParams).promise();
+    
+    res.status(201).json({
+      mensaje: "Menú creado/actualizado exitosamente",
+      menu: menuItem
+    });
+    
+  } catch (error) {
+    console.error("Error al crear/actualizar menú:", error);
+    res.status(500).json({
+      mensaje: "Error al procesar el menú",
+      error: error.message
+    });
+  }
+});
+
+// Obtener todas las órdenes de un evento
+app.get("/api/eventos/:eventoId/orders", async (req, res) => {
+  try {
+    const eventoId = req.params.eventoId;
+    
+    const params = {
+      TableName: TABLE_ORDERS,
+      FilterExpression: "eventoId = :eventoId",
+      ExpressionAttributeValues: {
+        ":eventoId": eventoId
+      }
+    };
+    
+    const data = await dynamoDB.scan(params).promise();
+    res.json(data.Items || []);
+    
+  } catch (error) {
+    console.error("Error al obtener órdenes del evento:", error);
+    res.status(500).json({
+      mensaje: "Error al obtener las órdenes del evento",
+      error: error.message
+    });
+  }
+});
+
+// Cambiar el estado de una orden (para administradores)
+app.post("/api/orders/:orderId/status", async (req, res) => {
+  try {
+    const orderId = req.params.orderId;
+    const { estado, fechaEntrega } = req.body;
+    
+    if (!estado) {
+      return res.status(400).json({
+        mensaje: "Se requiere el nuevo estado"
+      });
+    }
+    
+    // Verificar estados válidos
+    const estadosValidos = ['pendiente', 'completado', 'rechazado'];
+    if (!estadosValidos.includes(estado)) {
+      return res.status(400).json({
+        mensaje: "Estado no válido"
+      });
+    }
+    
+    // Verificar que la orden existe
+    const orderParams = {
+      TableName: TABLE_ORDERS,
+      Key: {
+        id: orderId
+      }
+    };
+    
+    const orderResult = await dynamoDB.get(orderParams).promise();
+    if (!orderResult.Item) {
+      return res.status(404).json({
+        mensaje: "La orden no existe"
+      });
+    }
+    
+    // Actualizar el estado y fecha de entrega si aplica
+    const updateParams = {
+      TableName: TABLE_ORDERS,
+      Key: {
+        id: orderId
+      },
+      UpdateExpression: "set estado = :estado, fechaEntrega = :fechaEntrega",
+      ExpressionAttributeValues: {
+        ":estado": estado,
+        ":fechaEntrega": estado === 'completado' ? (fechaEntrega || new Date().toISOString()) : null
+      },
+      ReturnValues: "ALL_NEW"
+    };
+    
+    const result = await dynamoDB.update(updateParams).promise();
+    
+    res.json({
+      mensaje: `Estado de la orden actualizado a: ${estado}`,
+      orden: result.Attributes
+    });
+    
+  } catch (error) {
+    console.error("Error al actualizar estado de orden:", error);
+    res.status(500).json({
+      mensaje: "Error al actualizar el estado",
+      error: error.message
+    });
+  }
+});
+
+//////////////////////////////// Ordenes ////////////////////////////////
+
+app.get("/api/menus", async (req, res) => {
+  try {
+    const params = {
+      TableName: TABLE_MENUS,
+    };
+
+    const data = await dynamoDB.scan(params).promise();
+    res.json(data.Items || []);
+  } catch (error) {
+    console.error("Error al obtener menús:", error);
+    res.status(500).json({
+      mensaje: "Error al obtener menús",
+      error: error.message,
+    });
+  }
+});
+
+// Crear una nueva orden
+app.post("/api/orders", async (req, res) => {
+  try {
+    const { userId, eventoId, productos, metodoPago, total, totalMXN, totalTuyos } = req.body;
+    
+    if (!userId || !eventoId || !productos || !Array.isArray(productos) || productos.length === 0) {
+      return res.status(400).json({
+        mensaje: "Datos incompletos para crear la orden"
+      });
+    }
+    
+    // Verificar que el usuario existe
+    const userParams = {
+      TableName: TABLE_USERS,
+      Key: {
+        id: userId
+      }
+    };
+    
+    const userResult = await dynamoDB.get(userParams).promise();
+    if (!userResult.Item) {
+      return res.status(404).json({
+        mensaje: "El usuario no existe"
+      });
+    }
+    
+    // Verificar que el evento existe
+    const eventoParams = {
+      TableName: TABLE_EVENTOS,
+      Key: {
+        id: eventoId
+      }
+    };
+    
+    const eventoResult = await dynamoDB.get(eventoParams).promise();
+    if (!eventoResult.Item) {
+      return res.status(404).json({
+        mensaje: "El evento no existe"
+      });
+    }
+    
+    // Verificar el saldo si el pago es con Tuyos
+    if (metodoPago === 'tuyos') {
+      const userSaldo = userResult.Item.saldo || 0;
+      
+      if (userSaldo < totalTuyos) {
+        return res.status(400).json({
+          mensaje: "Saldo insuficiente para completar la orden",
+          saldoActual: userSaldo
+        });
+      }
+      
+      // Actualizar el saldo del usuario (restar los Tuyos usados)
+      const updateUserParams = {
+        TableName: TABLE_USERS,
+        Key: {
+          id: userId
+        },
+        UpdateExpression: "set saldo = :nuevoSaldo",
+        ExpressionAttributeValues: {
+          ":nuevoSaldo": userSaldo - totalTuyos
+        },
+        ReturnValues: "UPDATED_NEW"
+      };
+      
+      await dynamoDB.update(updateUserParams).promise();
+    }
+    
+    // Crear la orden
+    const orderId = `ORDER-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+    
+    const orderItem = {
+      id: orderId,
+      userId,
+      userName: `${userResult.Item.nombres} ${userResult.Item.apellidos}`,
+      eventoId,
+      eventoNombre: eventoResult.Item.nombreEvento,
+      productos,
+      metodoPago,
+      total,
+      totalMXN: totalMXN || 0,
+      totalTuyos: totalTuyos || 0,
+      estado: "pendiente",
+      fechaCreacion: new Date().toISOString(),
+      fechaEntrega: null,
+      fechaConfirmacion: null,
+      confirmado: false
+    };
+    
+    const orderParams = {
+      TableName: TABLE_ORDERS,
+      Item: orderItem
+    };
+    
+    await dynamoDB.put(orderParams).promise();
+    
+    res.status(201).json({
+      mensaje: "Orden creada exitosamente",
+      orden: orderItem
+    });
+    
+  } catch (error) {
+    console.error("Error al crear orden:", error);
+    res.status(500).json({
+      mensaje: "Error al procesar la orden",
+      error: error.message
+    });
+  }
+});
+
+// Obtener órdenes de un usuario
+app.get("/api/users/:userId/orders", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    
+    const params = {
+      TableName: TABLE_ORDERS,
+      FilterExpression: "userId = :userId",
+      ExpressionAttributeValues: {
+        ":userId": userId
+      }
+    };
+    
+    const data = await dynamoDB.scan(params).promise();
+    res.json(data.Items || []);
+    
+  } catch (error) {
+    console.error("Error al obtener órdenes:", error);
+    res.status(500).json({
+      mensaje: "Error al obtener las órdenes",
+      error: error.message
+    });
+  }
+});
+
+// Confirmar recepción de una orden
+app.post("/api/orders/:orderId/confirm", async (req, res) => {
+  try {
+    const orderId = req.params.orderId;
+    const { userId, recibido } = req.body;
+    
+    if (!userId) {
+      return res.status(400).json({
+        mensaje: "Se requiere el ID del usuario"
+      });
+    }
+    
+    // Verificar que la orden existe
+    const orderParams = {
+      TableName: TABLE_ORDERS,
+      Key: {
+        id: orderId
+      }
+    };
+    
+    const orderResult = await dynamoDB.get(orderParams).promise();
+    if (!orderResult.Item) {
+      return res.status(404).json({
+        mensaje: "La orden no existe"
+      });
+    }
+    
+    // Verificar que la orden pertenezca al usuario
+    if (orderResult.Item.userId !== userId) {
+      return res.status(403).json({
+        mensaje: "No tienes permiso para confirmar esta orden"
+      });
+    }
+    
+    // Actualizar el estado de la orden
+    const updateParams = {
+      TableName: TABLE_ORDERS,
+      Key: {
+        id: orderId
+      },
+      UpdateExpression: "set estado = :estado, confirmado = :confirmado, fechaConfirmacion = :fechaConfirmacion",
+      ExpressionAttributeValues: {
+        ":estado": recibido ? "completado" : "rechazado",
+        ":confirmado": true,
+        ":fechaConfirmacion": new Date().toISOString()
+      },
+      ReturnValues: "ALL_NEW"
+    };
+    
+    const result = await dynamoDB.update(updateParams).promise();
+    
+    res.json({
+      mensaje: `Orden ${recibido ? 'confirmada' : 'rechazada'} correctamente`,
+      orden: result.Attributes
+    });
+    
+  } catch (error) {
+    console.error("Error al confirmar orden:", error);
+    res.status(500).json({
+      mensaje: "Error al procesar la confirmación",
+      error: error.message
+    });
+  }
+});
+
+
+
+
+//////////////////////////////// ConfAdicionales ////////////////////////////////
+
 const PORT = process.env.PORT;
 async function verificarConexionDynamoDB() {
   try {
@@ -1295,7 +1716,7 @@ async function verificarConexionDynamoDB() {
     // const descripcion = await dynamodb.describeTable({ TableName: TABLE_ITEMS }).promise();
     // console.log('Detalles de la tabla:', JSON.stringify(descripcion.Table, null, 2));
     // } else {
-    //     console.log(`⚠️ Advertencia: La tabla ${TABLE_ITEMS} no existe`);
+    //     console.log(`Advertencia: La tabla ${TABLE_ITEMS} no existe`);
     // }
 
     return true;
