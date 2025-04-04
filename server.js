@@ -1407,10 +1407,11 @@ app.get("/api/eventos/:eventoId/orders", async (req, res) => {
 });
 
 // Cambiar el estado de una orden (para administradores)
+// Cambiar el estado de una orden (para administradores)
 app.post("/api/orders/:orderId/status", async (req, res) => {
   try {
     const orderId = req.params.orderId;
-    const { estado, fechaEntrega } = req.body;
+    const { estado, fechaEntrega, fechaPago } = req.body;
     
     if (!estado) {
       return res.status(400).json({
@@ -1419,7 +1420,7 @@ app.post("/api/orders/:orderId/status", async (req, res) => {
     }
     
     // Verificar estados válidos
-    const estadosValidos = ['pendiente', 'completado', 'rechazado'];
+    const estadosValidos = ['pendiente', 'completado', 'pagado', 'rechazado'];
     if (!estadosValidos.includes(estado)) {
       return res.status(400).json({
         mensaje: "Estado no válido"
@@ -1441,17 +1442,30 @@ app.post("/api/orders/:orderId/status", async (req, res) => {
       });
     }
     
-    // Actualizar el estado y fecha de entrega si aplica
+    // Preparar expresión de actualización según el nuevo estado
+    let updateExpression = "set estado = :estado";
+    let expressionAttributeValues = {
+      ":estado": estado
+    };
+    
+    if (estado === 'completado' && fechaEntrega) {
+      updateExpression += ", fechaEntrega = :fechaEntrega";
+      expressionAttributeValues[":fechaEntrega"] = fechaEntrega;
+    }
+    
+    if (estado === 'pagado' && fechaPago) {
+      updateExpression += ", fechaPago = :fechaPago";
+      expressionAttributeValues[":fechaPago"] = fechaPago;
+    }
+    
+    // Actualizar el estado y fecha de entrega/pago si aplica
     const updateParams = {
       TableName: TABLE_ORDERS,
       Key: {
         id: orderId
       },
-      UpdateExpression: "set estado = :estado, fechaEntrega = :fechaEntrega",
-      ExpressionAttributeValues: {
-        ":estado": estado,
-        ":fechaEntrega": estado === 'completado' ? (fechaEntrega || new Date().toISOString()) : null
-      },
+      UpdateExpression: updateExpression,
+      ExpressionAttributeValues: expressionAttributeValues,
       ReturnValues: "ALL_NEW"
     };
     

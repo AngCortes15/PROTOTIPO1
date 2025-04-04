@@ -29,6 +29,10 @@
             --status-completed-bg: #eaf7f0;
             --status-rejected: #e53935;
             --status-rejected-bg: #fef5f5;
+            --status-delivered: #0288d1;
+            --status-delivered-bg: #e1f5fe;
+            --status-paid: #2e7d32;
+            --status-paid-bg: #eaf7f0;
         }
 
         body {
@@ -281,6 +285,16 @@
             background-color: var(--status-rejected-bg);
         }
 
+        .order-card.delivered {
+            border-left-color: var(--status-delivered);
+            background-color: var(--status-delivered-bg);
+        }
+
+        .order-card.paid {
+            border-left-color: var(--status-paid);
+            background-color: var(--status-paid-bg);
+        }
+
         .status-badge {
             position: absolute;
             top: 15px;
@@ -309,11 +323,21 @@
             color: white;
         }
 
+        .status-badge.delivered {
+            background-color: var(--status-delivered);
+            color: white;
+        }
+
+        .status-badge.paid {
+            background-color: var(--status-paid);
+            color: white;
+        }
+
         .order-header {
             display: flex;
             justify-content: space-between;
             margin-bottom: 15px;
-            padding-right: 90px;
+            padding-right: 120px;
             /* Espacio para el badge */
         }
 
@@ -530,7 +554,7 @@
                 flex-direction: column;
                 gap: 5px;
                 padding-right: 0;
-                padding-bottom: 40px;
+                padding-bottom: 50px;
                 /* Espacio para el badge */
             }
 
@@ -566,6 +590,28 @@
 
             .order-actions {
                 flex-direction: column;
+            }
+        }
+
+        /* Estilos para el panel de selección de pagos */
+        .selected-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .selected-total {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--status-paid);
+        }
+
+        @media (max-width: 768px) {
+            .selected-info {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
             }
         }
     </style>
@@ -631,9 +677,29 @@
 
         <!-- Contenedor de órdenes -->
         <div class="orders-container" id="ordersContainer">
+
+
             <!-- Órdenes se cargarán dinámicamente -->
             <div class="loader-container">
+
                 <div class="loader"></div>
+            </div>
+        </div>
+
+        <!-- Panel de acciones para pagar órdenes -->
+        <div class="actions-container" id="paymentActionsContainer" style="display: none;">
+            <div class="selected-info">
+                <div class="selected-count">
+                    <span id="selectedCount">0</span> órdenes seleccionadas
+                </div>
+                <div class="selected-total">
+                    Total a pagar: $<span id="selectedTotal">0.00</span> MXN
+                </div>
+            </div>
+            <div class="action-buttons">
+                <button id="markAsPaidBtn" class="btn btn-confirm" disabled>
+                    <i class="fas fa-money-bill"></i> Marcar como Pagadas
+                </button>
             </div>
         </div>
     </div>
@@ -857,6 +923,10 @@
             renderOrders(filteredOrders);
         }
 
+        // Variables globales adicionales para el pago múltiple
+        let selectedOrderIds = [];
+        let selectedOrdersTotal = 0;
+
         // Función para renderizar órdenes
         function renderOrders(orders) {
             const container = document.getElementById('ordersContainer');
@@ -870,10 +940,14 @@
                         <p>Cuando los clientes realicen pedidos, aparecerán aquí.</p>
                     </div>
                 `;
+                document.getElementById('paymentActionsContainer').style.display = 'none';
                 return;
             }
 
             let html = '';
+
+            const hasDeliveredOrders = orders.some(order =>
+                order.estado === 'completado' && order.metodoPago !== 'tuyos');
 
             orders.forEach(order => {
                 // Determinar clase y texto según estado
@@ -886,10 +960,17 @@
                         estadoIcon = 'fa-clock';
                         break;
                     case 'completado':
-                        estadoClass = 'completed';
+                        estadoClass = 'delivered';
                         estadoTexto = 'Entregado';
                         estadoIcon = 'fa-check-circle';
                         break;
+
+                    case 'pagado':
+                        estadoClass = 'paid';
+                        estadoTexto = 'Pagado';
+                        estadoIcon = 'fa-money-bill-wave';
+                        break;
+
                     case 'rechazado':
                         estadoClass = 'rejected';
                         estadoTexto = 'Rechazado';
@@ -906,7 +987,14 @@
                 const total = metodoPago === 'Tuyos' ? order.totalTuyos : order.totalMXN;
 
                 html += `
-                    <div class="order-card ${estadoClass}" data-order-id="${order.id}" data-order-status="${order.estado}">
+                    <div class="order-card ${estadoClass}" data-order-id="${order.id}" data-order-status="${order.estado}" data-order-total="${metodoPago === 'MXN' ? total : 0}">
+                        ${order.estado === 'completado' && metodoPago === 'MXN' ? `
+                            <div class="order-selection">
+                                <input type="checkbox" class="order-checkbox" data-id="${order.id}" data-total="${total}">
+                                <span>Seleccionar para confirmar pago</span>
+                            </div>
+                        ` : ''}
+                        
                         <div class="status-badge ${estadoClass}">
                             <i class="fas ${estadoIcon}"></i>
                             ${estadoTexto}
@@ -914,11 +1002,11 @@
                         
                         <div class="order-header">
                             <div class="order-id">Orden #${order.id.split('-')[1]}</div>
-                                <div class="order-date">
-                                    <i class="far fa-calendar-alt"></i>
-                                    ${formatDate(order.fechaCreacion)}
-                                </div>
+                            <div class="order-date">
+                                <i class="far fa-calendar-alt"></i>
+                                ${formatDate(order.fechaCreacion)}
                             </div>
+                        </div>
                    
                             <div class="order-details">
                                 <div class="detail-group">
@@ -989,13 +1077,119 @@
             });
 
             container.innerHTML = html;
+
+            // Mostrar panel de acciones si hay órdenes que puedan ser pagadas
+            document.getElementById('paymentActionsContainer').style.display = hasDeliveredOrders ? 'flex' : 'none';
+
+            // Añadir event listeners a los checkboxes
+            addCheckboxListeners();
+
+        }
+
+        // Función para añadir event listeners a los checkboxes
+        function addCheckboxListeners() {
+            const checkboxes = document.querySelectorAll('.order-checkbox');
+
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function () {
+                    const orderId = this.getAttribute('data-id');
+                    const orderTotal = parseFloat(this.getAttribute('data-total') || 0);
+
+                    if (this.checked) {
+                        // Añadir a seleccionados si no está ya
+                        if (!selectedOrderIds.includes(orderId)) {
+                            selectedOrderIds.push(orderId);
+                            selectedOrdersTotal += orderTotal;
+                        }
+                    } else {
+                        // Eliminar de seleccionados
+                        selectedOrderIds = selectedOrderIds.filter(id => id !== orderId);
+                        selectedOrdersTotal -= orderTotal;
+                    }
+
+                    // Actualizar contador y estado del botón
+                    updateSelectedCount();
+                });
+            });
+        }
+
+        // Actualizar contador de órdenes seleccionadas y total
+        function updateSelectedCount() {
+            const countElement = document.getElementById('selectedCount');
+            const totalElement = document.getElementById('selectedTotal');
+            const confirmButton = document.getElementById('markAsPaidBtn');
+
+            countElement.textContent = selectedOrderIds.length;
+            totalElement.textContent = selectedOrdersTotal.toFixed(2);
+
+            // Habilitar o deshabilitar botón según si hay selecciones
+            confirmButton.disabled = selectedOrderIds.length === 0;
+        }
+
+        // Función para marcar órdenes seleccionadas como pagadas
+        async function markOrdersAsPaid() {
+            try {
+                if (selectedOrderIds.length === 0) return;
+
+                // Confirmar con el usuario
+                if (!confirm(`¿Confirmas el pago de ${selectedOrderIds.length} órdenes por un total de $${selectedOrdersTotal.toFixed(2)} MXN?`)) {
+                    return;
+                }
+
+                // Deshabilitar botón mientras se procesa
+                const confirmButton = document.getElementById('markAsPaidBtn');
+                confirmButton.disabled = true;
+                confirmButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+
+                // Crear un array de promesas para marcar cada orden como pagada
+                const paymentPromises = selectedOrderIds.map(orderId => {
+                    return fetch(`${API_URL}/orders/${orderId}/status`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            estado: 'pagado',
+                            fechaPago: new Date().toISOString()
+                        })
+                    }).then(response => {
+                        if (!response.ok) {
+                            throw new Error(`Error al procesar pago de orden ${orderId}`);
+                        }
+                        return response.json();
+                    });
+                });
+
+                // Ejecutar todas las operaciones de pago
+                await Promise.all(paymentPromises);
+
+                // Mostrar mensaje de éxito
+                alert('¡Pagos procesados exitosamente!');
+
+                // Limpiar selecciones
+                selectedOrderIds = [];
+                selectedOrdersTotal = 0;
+
+                // Recargar órdenes
+                loadEventOrders();
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert(`Error al procesar pagos: ${error.message}`);
+
+                // Restaurar botón
+                const confirmButton = document.getElementById('markAsPaidBtn');
+                confirmButton.disabled = false;
+                confirmButton.innerHTML = '<i class="fas fa-money-bill"></i> Marcar como Pagadas';
+            }
         }
 
         // Inicializar eventos cuando carga la página
         document.addEventListener('DOMContentLoaded', function () {
             // Cargar órdenes
             loadEventOrders();
-
+            // Event listener para el botón de pago múltiple
+            document.getElementById('markAsPaidBtn').addEventListener('click', markOrdersAsPaid);
             // Event listeners para filtros
             document.getElementById('searchInput').addEventListener('input', filterOrders);
             document.getElementById('statusFilter').addEventListener('change', filterOrders);

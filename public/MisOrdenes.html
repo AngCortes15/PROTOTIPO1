@@ -27,6 +27,12 @@
             --status-pending-bg: #fff9e6;
             --status-completed: #2e7d32;
             --status-completed-bg: #eaf7f0;
+            --status-rejected: #e53935;
+            --status-rejected-bg: #fef5f5;
+            --status-delivered: #0288d1;
+            --status-delivered-bg: #e1f5fe;
+            --status-paid: #2e7d32;
+            --status-paid-bg: #eaf7f0;
         }
 
         body {
@@ -223,6 +229,20 @@
             border-left-color: var(--status-completed);
             background-color: var(--status-completed-bg);
         }
+        .order-card.rejected {
+            border-left-color: var(--status-rejected);
+            background-color: var(--status-rejected-bg);
+        }
+        /* Actualizar las clases de estados */
+        .order-card.delivered {
+            border-left-color: var(--status-delivered);
+            background-color: var(--status-delivered-bg);
+        }
+
+        .order-card.paid {
+            border-left-color: var(--status-paid);
+            background-color: var(--status-paid-bg);
+        }
 
         .status-badge {
             position: absolute;
@@ -247,11 +267,26 @@
             color: white;
         }
 
+        .status-badge.rejected {
+            background-color: var(--status-rejected);
+            color: white;
+        }
+
+        .status-badge.delivered {
+            background-color: var(--status-delivered);
+            color: white;
+        }
+
+        .status-badge.paid {
+            background-color: var(--status-paid);
+            color: white;
+        }
+
         .order-header {
             display: flex;
             justify-content: space-between;
             margin-bottom: 15px;
-            padding-right: 90px;
+            padding-right: 120px;
             /* Espacio para el badge */
         }
 
@@ -489,7 +524,7 @@
                 flex-direction: column;
                 gap: 5px;
                 padding-right: 0;
-                padding-bottom: 40px;
+                padding-bottom: 50px;
                 /* Espacio para el badge */
             }
 
@@ -863,6 +898,7 @@
         // Función para renderizar órdenes
         // Función para renderizar órdenes - VERSIÓN CORREGIDA
         function renderOrders(orders) {
+
             const container = document.getElementById('ordersContainer');
 
             // Si no hay órdenes, mostrar mensaje
@@ -889,35 +925,60 @@
 
             orders.forEach(order => {
                 // Determinar clase y texto según estado
-                const estadoClass = order.estado === 'pendiente' ? 'pending' : 'completed';
-                const estadoTexto = order.estado === 'pendiente' ? 'Pendiente' : 'Entregado';
-                const estadoIcon = order.estado === 'pendiente' ? 'fa-clock' : 'fa-check-circle';
+                let estadoClass, estadoTexto, estadoIcon;
+
+                switch (order.estado) {
+                    case 'pendiente':
+                        estadoClass = 'pending';
+                        estadoTexto = 'Pendiente';
+                        estadoIcon = 'fa-clock';
+                        break;
+                    case 'completado':
+                        estadoClass = 'delivered';
+                        estadoTexto = 'Entregado';
+                        estadoIcon = 'fa-check-circle';
+                        break;
+                    case 'pagado':
+                        estadoClass = 'paid';
+                        estadoTexto = 'Pagado';
+                        estadoIcon = 'fa-money-bill-wave';
+                        break;
+                    case 'rechazado':
+                        estadoClass = 'rejected';
+                        estadoTexto = 'Rechazado';
+                        estadoIcon = 'fa-times-circle';
+                        break;
+                    default:
+                        estadoClass = 'pending';
+                        estadoTexto = 'Pendiente';
+                        estadoIcon = 'fa-clock';
+                }
 
                 // Calcular totales de la orden
                 const metodoPago = order.metodoPago === 'tuyos' ? 'Tuyos' : 'MXN';
                 const total = metodoPago === 'Tuyos' ? order.totalTuyos : order.totalMXN;
 
                 html += `
-            <div class="order-card ${estadoClass}" data-order-id="${order.id}" data-order-status="${order.estado}">
-                ${order.estado === 'pendiente' ? `
-                    <div class="order-selection">
-                        <input type="checkbox" class="order-checkbox" data-id="${order.id}">
-                        <span>Seleccionar para confirmar recepción</span>
+                <div class="order-card ${estadoClass}" data-order-id="${order.id}" data-order-status="${order.estado}">
+                    ${order.estado === 'pendiente' ? `
+                        <div class="order-selection">
+                            <input type="checkbox" class="order-checkbox" data-id="${order.id}">
+                            <span>Seleccionar para confirmar recepción</span>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="status-badge ${estadoClass}">
+                        <i class="fas ${estadoIcon}"></i>
+                        ${estadoTexto}
                     </div>
-                ` : ''}
-                
-                <div class="status-badge ${estadoClass}">
-                    <i class="fas ${estadoIcon}"></i>
-                    ${estadoTexto}
-                </div>
-                
-                <div class="order-header">
-                    <div class="order-id">Orden #${order.id.split('-')[1]}</div>
-                    <div class="order-date">
-                        <i class="far fa-calendar-alt"></i>
-                        ${formatDate(order.fechaCreacion)}
+                    
+                    <div class="order-header">
+                        <div class="order-id">Orden #${order.id.split('-')[1]}</div>
+                        <div class="order-date">
+                            <i class="far fa-calendar-alt"></i>
+                            ${formatDate(order.fechaCreacion)}
+                        </div>
                     </div>
-                </div>
                 
                 <div class="order-details">
                     <div class="detail-group">
