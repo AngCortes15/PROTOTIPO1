@@ -441,6 +441,74 @@
                 margin-top: 20px;
             }
         }
+
+        /* Distintivo Button */
+        .distintivo-btn {
+            background-color: var(--purple-button);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(156, 39, 176, 0.3);
+        }
+
+        .distintivo-btn:hover {
+            background-color: var(--purple-button-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(156, 39, 176, 0.4);
+        }
+
+        .distintivo-btn i {
+            font-size: 18px;
+        }
+
+        .distintivo-badge {
+            background-color: #f3e5f5;
+            color: var(--purple-button);
+            border: 1px solid #e1bee7;
+            border-radius: 6px;
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .distintivo-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .distintivo-info i {
+            font-size: 20px;
+            color: var(--purple-button);
+        }
+
+        .distintivo-text {
+            font-weight: 500;
+        }
+
+        .distintivo-edit {
+            color: var(--purple-button);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .distintivo-edit:hover {
+            color: var(--purple-button-hover);
+            text-decoration: underline;
+        }
     </style>
 </head>
 
@@ -478,6 +546,11 @@
 
         <div class="row">
             <div class="col-lg-8">
+                <!-- Botón o Badge de Distintivo -->
+                <div id="distintivo-container">
+                    <!-- Aquí se mostrará el botón para crear un distintivo o el distintivo ya existente -->
+                </div>
+
                 <div class="menu-container">
                     <h2 class="section-title">Menú Disponible</h2>
                     <div id="menu-products-container">
@@ -542,6 +615,8 @@
         let eventoNombre = '';
         let menuProducts = [];
         let cartItems = [];
+        let hasDistintivo = false;
+        let currentDistintivo = null;
 
         // Función para obtener parámetros de la URL
         function getURLParams() {
@@ -597,6 +672,85 @@
                     alertElement.remove();
                 }, 5000);
             }
+        }
+
+        // Verificar si el usuario tiene un distintivo para este evento
+        async function checkDistintivo() {
+            try {
+                const userId = localStorage.getItem('userId');
+                if (!userId) {
+                    showAlert('Debes iniciar sesión para realizar un pedido', 'warning');
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                    return false;
+                }
+
+                const response = await fetch(`${API_URL}/eventos/${eventoId}/distintivo/${userId}`);
+
+                if (response.status === 404) {
+                    // No tiene distintivo aún
+                    hasDistintivo = false;
+                    currentDistintivo = null;
+                    renderDistintivoButton();
+                    return false;
+                }
+
+                if (!response.ok) {
+                    throw new Error('Error al verificar distintivo');
+                }
+
+                const distintivo = await response.json();
+                hasDistintivo = true;
+                currentDistintivo = distintivo;
+                renderDistintivoButton();
+                return true;
+            } catch (error) {
+                console.error('Error:', error);
+                hasDistintivo = false;
+                renderDistintivoButton();
+                return false;
+            }
+        }
+
+        // Renderizar botón o badge de distintivo
+        function renderDistintivoButton() {
+            const container = document.getElementById('distintivo-container');
+
+            if (hasDistintivo && currentDistintivo) {
+                // Mostrar el distintivo como badge
+                container.innerHTML = `
+                    <div class="distintivo-badge">
+                        <div class="distintivo-info">
+                            <i class="fas fa-id-badge"></i>
+                            <div>
+                                <div class="distintivo-text">${currentDistintivo.tipo}: ${currentDistintivo.valor}</div>
+                            </div>
+                        </div>
+                        <button class="distintivo-edit" onclick="editDistintivo()">
+                            <i class="fas fa-pencil-alt me-1"></i> Editar
+                        </button>
+                    </div>
+                `;
+            } else {
+                // Mostrar botón para crear distintivo
+                container.innerHTML = `
+                    <button class="distintivo-btn" onclick="createDistintivo()">
+                        <i class="fas fa-id-badge"></i>
+                        Crear Distintivo
+                    </button>
+                `;
+            }
+        }
+
+        // Función para ir a la página de creación de distintivo
+        function createDistintivo() {
+            window.location.href = `Distintivo.html?eventoId=${eventoId}&eventoNombre=${encodeURIComponent(eventoNombre)}&action=create`;
+        }
+
+        // Función para ir a la página de edición de distintivo
+        function editDistintivo() {
+            window.location.href = `Distintivo.html?eventoId=${eventoId}&eventoNombre=${encodeURIComponent(eventoNombre)}&action=edit`;
         }
 
         // Cargar menú del evento
@@ -815,6 +969,15 @@
                 return;
             }
 
+            // Validar que el usuario tenga un distintivo
+            if (!hasDistintivo) {
+                showAlert('Necesitas crear un distintivo para que podamos identificarte al entregar tu pedido', 'warning');
+                setTimeout(() => {
+                    createDistintivo();
+                }, 2000);
+                return;
+            }
+
             // Obtener el método de pago seleccionado
             const metodoPago = document.querySelector('input[name="paymentMethod"]:checked').value;
 
@@ -901,6 +1064,9 @@
         async function init() {
             // Obtener parámetros de la URL
             if (!getURLParams()) return;
+
+            // Verificar si el usuario tiene distintivo
+            await checkDistintivo();
 
             // Cargar menú del evento
             const menuLoaded = await loadEventMenu();

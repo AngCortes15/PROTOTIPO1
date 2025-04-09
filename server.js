@@ -358,9 +358,9 @@ app.post("/api/users/verify", async (req, res) => {
     const { email, whatsapp } = req.body;
 
     if (!email || !whatsapp) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         mensaje: "Se requieren ambos campos: email y whatsapp",
-        isValid: false 
+        isValid: false
       });
     }
 
@@ -376,9 +376,9 @@ app.post("/api/users/verify", async (req, res) => {
     const result = await dynamoDB.scan(params).promise();
 
     if (!result.Items || result.Items.length === 0) {
-      return res.status(401).json({ 
+      return res.status(401).json({
         mensaje: "Credenciales incorrectas",
-        isValid: false 
+        isValid: false
       });
     }
 
@@ -403,53 +403,53 @@ app.post("/api/users/verify", async (req, res) => {
 // Ruta para verificar usuarios duplicados
 app.post("/api/users/check-duplicate", async (req, res) => {
   try {
-      const { email, whatsapp } = req.body;
+    const { email, whatsapp } = req.body;
 
-      if (!email || !whatsapp) {
-          return res.status(400).json({
-              mensaje: "Se requieren email y whatsapp para la verificación",
-              exists: false
-          });
-      }
-
-      // Buscar usuarios con el mismo email
-      const emailCheckParams = {
-          TableName: TABLE_USERS,
-          FilterExpression: "email = :email",
-          ExpressionAttributeValues: {
-              ":email": email
-          }
-      };
-
-      // Buscar usuarios con el mismo whatsapp
-      const whatsappCheckParams = {
-          TableName: TABLE_USERS,
-          FilterExpression: "whatsapp = :whatsapp",
-          ExpressionAttributeValues: {
-              ":whatsapp": whatsapp
-          }
-      };
-
-      const [emailResult, whatsappResult] = await Promise.all([
-          dynamoDB.scan(emailCheckParams).promise(),
-          dynamoDB.scan(whatsappCheckParams).promise()
-      ]);
-
-      const duplicateEmail = emailResult.Items && emailResult.Items.length > 0;
-      const duplicateWhatsapp = whatsappResult.Items && whatsappResult.Items.length > 0;
-
-      res.json({
-          exists: duplicateEmail || duplicateWhatsapp,
-          duplicateEmail,
-          duplicateWhatsapp
+    if (!email || !whatsapp) {
+      return res.status(400).json({
+        mensaje: "Se requieren email y whatsapp para la verificación",
+        exists: false
       });
+    }
+
+    // Buscar usuarios con el mismo email
+    const emailCheckParams = {
+      TableName: TABLE_USERS,
+      FilterExpression: "email = :email",
+      ExpressionAttributeValues: {
+        ":email": email
+      }
+    };
+
+    // Buscar usuarios con el mismo whatsapp
+    const whatsappCheckParams = {
+      TableName: TABLE_USERS,
+      FilterExpression: "whatsapp = :whatsapp",
+      ExpressionAttributeValues: {
+        ":whatsapp": whatsapp
+      }
+    };
+
+    const [emailResult, whatsappResult] = await Promise.all([
+      dynamoDB.scan(emailCheckParams).promise(),
+      dynamoDB.scan(whatsappCheckParams).promise()
+    ]);
+
+    const duplicateEmail = emailResult.Items && emailResult.Items.length > 0;
+    const duplicateWhatsapp = whatsappResult.Items && whatsappResult.Items.length > 0;
+
+    res.json({
+      exists: duplicateEmail || duplicateWhatsapp,
+      duplicateEmail,
+      duplicateWhatsapp
+    });
 
   } catch (error) {
-      console.error("Error al verificar duplicados:", error);
-      res.status(500).json({
-          mensaje: "Error al verificar duplicados",
-          error: error.message
-      });
+    console.error("Error al verificar duplicados:", error);
+    res.status(500).json({
+      mensaje: "Error al verificar duplicados",
+      error: error.message
+    });
   }
 });
 
@@ -495,13 +495,13 @@ app.get("/api/users/:id/balance", async (req, res) => {
 app.post("/api/users/:id/balance", async (req, res) => {
   try {
     const { amount, operation } = req.body;
-    
+
     if (amount === undefined || !['add', 'subtract'].includes(operation)) {
-      return res.status(400).json({ 
-        mensaje: "Se requiere una cantidad (amount) y operación válida (add o subtract)" 
+      return res.status(400).json({
+        mensaje: "Se requiere una cantidad (amount) y operación válida (add o subtract)"
       });
     }
-    
+
     // Obtener usuario actual para verificar el saldo
     const userParams = {
       TableName: TABLE_USERS,
@@ -509,16 +509,16 @@ app.post("/api/users/:id/balance", async (req, res) => {
         id: req.params.id,
       }
     };
-    
+
     const userResult = await dynamoDB.get(userParams).promise();
-    
+
     if (!userResult.Item) {
       return res.status(404).json({ mensaje: "Usuario no encontrado" });
     }
-    
+
     // Obtener saldo actual (default a 0 si no existe)
     const currentBalance = userResult.Item.saldo !== undefined ? userResult.Item.saldo : 0;
-    
+
     // Calcular nuevo saldo
     let newBalance;
     if (operation === 'add') {
@@ -527,13 +527,13 @@ app.post("/api/users/:id/balance", async (req, res) => {
       newBalance = currentBalance - parseFloat(amount);
       // Verificar que no quede balance negativo
       if (newBalance < 0) {
-        return res.status(400).json({ 
+        return res.status(400).json({
           mensaje: "Saldo insuficiente para realizar esta operación",
-          saldoActual: currentBalance 
+          saldoActual: currentBalance
         });
       }
     }
-    
+
     // Actualizar el saldo en la base de datos
     const updateParams = {
       TableName: TABLE_USERS,
@@ -546,9 +546,9 @@ app.post("/api/users/:id/balance", async (req, res) => {
       },
       ReturnValues: "ALL_NEW"
     };
-    
+
     const result = await dynamoDB.update(updateParams).promise();
-    
+
     res.json({
       mensaje: `Saldo ${operation === 'add' ? 'aumentado' : 'reducido'} correctamente`,
       saldoAnterior: currentBalance,
@@ -556,7 +556,7 @@ app.post("/api/users/:id/balance", async (req, res) => {
       operacion: operation,
       cantidad: parseFloat(amount)
     });
-    
+
   } catch (error) {
     console.error("Error al actualizar saldo:", error);
     res.status(500).json({
@@ -570,7 +570,7 @@ app.post("/api/users/:id/balance", async (req, res) => {
 app.get("/api/users/check-phone/:phone", async (req, res) => {
   try {
     const phone = req.params.phone;
-    
+
     if (!phone) {
       return res.status(400).json({
         mensaje: "Se requiere un número de teléfono",
@@ -609,7 +609,7 @@ app.get("/api/users/check-phone/:phone", async (req, res) => {
 app.post("/api/transfers", async (req, res) => {
   try {
     const { from, toPhone, amount, concept, date } = req.body;
-    
+
     if (!from || !toPhone || !amount || amount <= 0) {
       return res.status(400).json({
         mensaje: "Se requiere un remitente (from), destinatario (toPhone) y una cantidad positiva (amount)"
@@ -675,7 +675,7 @@ app.post("/api/transfers", async (req, res) => {
       toName: `${toUser.nombres} ${toUser.apellidos}`,
       toPhone: toPhone,
       amount: amountNum,
-      concept: concept || "", 
+      concept: concept || "",
       date: date || new Date().toISOString(),
       status: "completed"
     };
@@ -720,7 +720,7 @@ app.post("/api/transfers", async (req, res) => {
     // Primero actualizamos el remitente, luego el destinatario y finalmente guardamos el registro
     const fromUpdate = await dynamoDB.update(updateFromParams).promise();
     const toUpdate = await dynamoDB.update(updateToParams).promise();
-    
+
     // Solo guardamos el registro de transferencia si la tabla existe
     try {
       await dynamoDB.put(saveTransferParams).promise();
@@ -751,7 +751,7 @@ app.post("/api/transfers", async (req, res) => {
 app.get("/api/users/:id/transfers", async (req, res) => {
   try {
     const userId = req.params.id;
-    
+
     if (!userId) {
       return res.status(400).json({
         mensaje: "Se requiere un ID de usuario"
@@ -1078,115 +1078,115 @@ app.post("/api/eventos", async (req, res) => {
 
 //Inscribirse a eventos
 app.post('/api/eventos/:eventoId/inscripcion', async (req, res) => {
-    try {
-        const { eventoId } = req.params;
-        const { userId } = req.body;
+  try {
+    const { eventoId } = req.params;
+    const { userId } = req.body;
 
-        // Validación de IDs
-        if (!eventoId || !userId) {
-            return res.status(400).json({
-                mensaje: 'Se requiere ID del evento y del usuario'
-            });
-        }
-
-        // Verificar que el usuario existe
-        const userParams = {
-            TableName: TABLE_USERS,
-            Key: {
-                id: userId
-            }
-        };
-
-        const userResult = await dynamoDB.get(userParams).promise();
-        if (!userResult.Item) {
-            return res.status(404).json({
-                mensaje: 'Usuario no encontrado'
-            });
-        }
-
-        // Obtener información del evento
-        const eventoParams = {
-            TableName: TABLE_EVENTOS,
-            Key: {
-                id: eventoId
-            }
-        };
-
-        const eventoResult = await dynamoDB.get(eventoParams).promise();
-        const evento = eventoResult.Item;
-
-        if (!evento) {
-            return res.status(404).json({
-                mensaje: 'Evento no encontrado'
-            });
-        }
-
-        // Verificar si el evento es público
-        if (!evento.esPublico) {
-            return res.status(403).json({
-                mensaje: 'Este evento no está disponible para inscripción'
-            });
-        }
-
-        // Verificar si el evento ya pasó
-        const fechaActual = new Date();
-        const fechaEvento = new Date(evento.fecha + 'T' + evento.horaInicio);
-        
-        if (fechaEvento < fechaActual) {
-            return res.status(400).json({
-                mensaje: 'Este evento ya ha pasado'
-            });
-        }
-
-        // Verificar si hay cupo disponible
-        const participantesActuales = evento.participantesInscritos || 0;
-        if (participantesActuales >= evento.capacidadMaxima) {
-            return res.status(400).json({
-                mensaje: 'El evento está lleno'
-            });
-        }
-
-        // Verificar si el usuario ya está inscrito
-        const participantes = evento.participantes || [];
-        if (participantes.includes(userId)) {
-            return res.status(400).json({
-                mensaje: 'Ya estás inscrito en este evento'
-            });
-        }
-
-        // Preparar la actualización
-        const updateParams = {
-            TableName: TABLE_EVENTOS,
-            Key: {
-                id: eventoId
-            },
-            UpdateExpression: 'SET participantesInscritos = if_not_exists(participantesInscritos, :zero) + :uno, participantes = list_append(if_not_exists(participantes, :empty_list), :new_participant)',
-            ExpressionAttributeValues: {
-                ':uno': 1,
-                ':zero': 0,
-                ':empty_list': [],
-                ':new_participant': [userId]
-            },
-            ReturnValues: 'ALL_NEW'
-        };
-
-        // Realizar la actualización
-        await dynamoDB.update(updateParams).promise();
-
-        // Responder con éxito
-        res.status(200).json({
-            mensaje: 'Te has inscrito exitosamente al evento',
-            success: true
-        });
-
-    } catch (error) {
-        console.error('Error al procesar inscripción:', error);
-        res.status(500).json({
-            mensaje: 'Error al procesar la inscripción',
-            error: error.message,
-            success: false
-        });
+    // Validación de IDs
+    if (!eventoId || !userId) {
+      return res.status(400).json({
+        mensaje: 'Se requiere ID del evento y del usuario'
+      });
     }
+
+    // Verificar que el usuario existe
+    const userParams = {
+      TableName: TABLE_USERS,
+      Key: {
+        id: userId
+      }
+    };
+
+    const userResult = await dynamoDB.get(userParams).promise();
+    if (!userResult.Item) {
+      return res.status(404).json({
+        mensaje: 'Usuario no encontrado'
+      });
+    }
+
+    // Obtener información del evento
+    const eventoParams = {
+      TableName: TABLE_EVENTOS,
+      Key: {
+        id: eventoId
+      }
+    };
+
+    const eventoResult = await dynamoDB.get(eventoParams).promise();
+    const evento = eventoResult.Item;
+
+    if (!evento) {
+      return res.status(404).json({
+        mensaje: 'Evento no encontrado'
+      });
+    }
+
+    // Verificar si el evento es público
+    if (!evento.esPublico) {
+      return res.status(403).json({
+        mensaje: 'Este evento no está disponible para inscripción'
+      });
+    }
+
+    // Verificar si el evento ya pasó
+    const fechaActual = new Date();
+    const fechaEvento = new Date(evento.fecha + 'T' + evento.horaInicio);
+
+    if (fechaEvento < fechaActual) {
+      return res.status(400).json({
+        mensaje: 'Este evento ya ha pasado'
+      });
+    }
+
+    // Verificar si hay cupo disponible
+    const participantesActuales = evento.participantesInscritos || 0;
+    if (participantesActuales >= evento.capacidadMaxima) {
+      return res.status(400).json({
+        mensaje: 'El evento está lleno'
+      });
+    }
+
+    // Verificar si el usuario ya está inscrito
+    const participantes = evento.participantes || [];
+    if (participantes.includes(userId)) {
+      return res.status(400).json({
+        mensaje: 'Ya estás inscrito en este evento'
+      });
+    }
+
+    // Preparar la actualización
+    const updateParams = {
+      TableName: TABLE_EVENTOS,
+      Key: {
+        id: eventoId
+      },
+      UpdateExpression: 'SET participantesInscritos = if_not_exists(participantesInscritos, :zero) + :uno, participantes = list_append(if_not_exists(participantes, :empty_list), :new_participant)',
+      ExpressionAttributeValues: {
+        ':uno': 1,
+        ':zero': 0,
+        ':empty_list': [],
+        ':new_participant': [userId]
+      },
+      ReturnValues: 'ALL_NEW'
+    };
+
+    // Realizar la actualización
+    await dynamoDB.update(updateParams).promise();
+
+    // Responder con éxito
+    res.status(200).json({
+      mensaje: 'Te has inscrito exitosamente al evento',
+      success: true
+    });
+
+  } catch (error) {
+    console.error('Error al procesar inscripción:', error);
+    res.status(500).json({
+      mensaje: 'Error al procesar la inscripción',
+      error: error.message,
+      success: false
+    });
+  }
 });
 
 
@@ -1279,7 +1279,7 @@ function generateInscripcionId() {
 app.get("/api/eventos/:eventoId/menu", async (req, res) => {
   try {
     const eventoId = req.params.eventoId;
-    
+
     const params = {
       TableName: TABLE_MENUS,
       FilterExpression: "eventoId = :eventoId",
@@ -1289,14 +1289,14 @@ app.get("/api/eventos/:eventoId/menu", async (req, res) => {
     };
 
     const data = await dynamoDB.scan(params).promise();
-    
+
     if (!data.Items || data.Items.length === 0) {
       return res.status(404).json({
         mensaje: "No se encontró un menú para este evento",
         exists: false
       });
     }
-    
+
     res.json(data.Items[0]);
   } catch (error) {
     console.error("Error al obtener menú de evento:", error);
@@ -1312,13 +1312,13 @@ app.post("/api/eventos/:eventoId/menu", async (req, res) => {
   try {
     const eventoId = req.params.eventoId;
     const { productos } = req.body;
-    
+
     if (!Array.isArray(productos) || productos.length === 0) {
       return res.status(400).json({
         mensaje: "Se requiere un arreglo de productos válido"
       });
     }
-    
+
     // Verificar que el evento existe
     const eventoParams = {
       TableName: TABLE_EVENTOS,
@@ -1326,19 +1326,19 @@ app.post("/api/eventos/:eventoId/menu", async (req, res) => {
         id: eventoId
       }
     };
-    
+
     const eventoResult = await dynamoDB.get(eventoParams).promise();
     if (!eventoResult.Item) {
       return res.status(404).json({
         mensaje: "El evento especificado no existe"
       });
     }
-    
+
     // Formatear y validar los productos
     const productosFormateados = productos.map(producto => {
       // Generar código único si no se proporciona
       const codigo = producto.codigo || `PROD-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
-      
+
       return {
         codigo,
         descripcion: producto.descripcion || '',
@@ -1348,10 +1348,10 @@ app.post("/api/eventos/:eventoId/menu", async (req, res) => {
         disponible: producto.disponible !== false // Por defecto disponible
       };
     });
-    
+
     // Crear o actualizar el menú
     const menuId = `MENU-${eventoId}`;
-    
+
     const menuItem = {
       id: menuId,
       eventoId: eventoId,
@@ -1359,19 +1359,19 @@ app.post("/api/eventos/:eventoId/menu", async (req, res) => {
       fechaActualizacion: new Date().toISOString(),
       productos: productosFormateados
     };
-    
+
     const menuParams = {
       TableName: TABLE_MENUS,
       Item: menuItem
     };
-    
+
     await dynamoDB.put(menuParams).promise();
-    
+
     res.status(201).json({
       mensaje: "Menú creado/actualizado exitosamente",
       menu: menuItem
     });
-    
+
   } catch (error) {
     console.error("Error al crear/actualizar menú:", error);
     res.status(500).json({
@@ -1385,7 +1385,7 @@ app.post("/api/eventos/:eventoId/menu", async (req, res) => {
 app.get("/api/eventos/:eventoId/orders", async (req, res) => {
   try {
     const eventoId = req.params.eventoId;
-    
+
     const params = {
       TableName: TABLE_ORDERS,
       FilterExpression: "eventoId = :eventoId",
@@ -1393,10 +1393,10 @@ app.get("/api/eventos/:eventoId/orders", async (req, res) => {
         ":eventoId": eventoId
       }
     };
-    
+
     const data = await dynamoDB.scan(params).promise();
     res.json(data.Items || []);
-    
+
   } catch (error) {
     console.error("Error al obtener órdenes del evento:", error);
     res.status(500).json({
@@ -1412,13 +1412,13 @@ app.post("/api/orders/:orderId/status", async (req, res) => {
   try {
     const orderId = req.params.orderId;
     const { estado, fechaEntrega, fechaPago } = req.body;
-    
+
     if (!estado) {
       return res.status(400).json({
         mensaje: "Se requiere el nuevo estado"
       });
     }
-    
+
     // Verificar estados válidos
     const estadosValidos = ['pendiente', 'completado', 'pagado', 'rechazado'];
     if (!estadosValidos.includes(estado)) {
@@ -1426,7 +1426,7 @@ app.post("/api/orders/:orderId/status", async (req, res) => {
         mensaje: "Estado no válido"
       });
     }
-    
+
     // Verificar que la orden existe
     const orderParams = {
       TableName: TABLE_ORDERS,
@@ -1434,30 +1434,30 @@ app.post("/api/orders/:orderId/status", async (req, res) => {
         id: orderId
       }
     };
-    
+
     const orderResult = await dynamoDB.get(orderParams).promise();
     if (!orderResult.Item) {
       return res.status(404).json({
         mensaje: "La orden no existe"
       });
     }
-    
+
     // Preparar expresión de actualización según el nuevo estado
     let updateExpression = "set estado = :estado";
     let expressionAttributeValues = {
       ":estado": estado
     };
-    
+
     if (estado === 'completado' && fechaEntrega) {
       updateExpression += ", fechaEntrega = :fechaEntrega";
       expressionAttributeValues[":fechaEntrega"] = fechaEntrega;
     }
-    
+
     if (estado === 'pagado' && fechaPago) {
       updateExpression += ", fechaPago = :fechaPago";
       expressionAttributeValues[":fechaPago"] = fechaPago;
     }
-    
+
     // Actualizar el estado y fecha de entrega/pago si aplica
     const updateParams = {
       TableName: TABLE_ORDERS,
@@ -1468,18 +1468,266 @@ app.post("/api/orders/:orderId/status", async (req, res) => {
       ExpressionAttributeValues: expressionAttributeValues,
       ReturnValues: "ALL_NEW"
     };
-    
+
     const result = await dynamoDB.update(updateParams).promise();
-    
+
     res.json({
       mensaje: `Estado de la orden actualizado a: ${estado}`,
       orden: result.Attributes
     });
-    
+
   } catch (error) {
     console.error("Error al actualizar estado de orden:", error);
     res.status(500).json({
       mensaje: "Error al actualizar el estado",
+      error: error.message
+    });
+  }
+});
+
+// Obtener distintivo de un usuario para un evento específico
+app.get("/api/eventos/:eventoId/distintivo/:userId", async (req, res) => {
+  try {
+    const { eventoId, userId } = req.params;
+
+    if (!eventoId || !userId) {
+      return res.status(400).json({
+        mensaje: "Se requiere ID del evento y del usuario"
+      });
+    }
+
+    // Buscar usuario
+    const params = {
+      TableName: TABLE_USERS,
+      Key: {
+        id: userId
+      }
+    };
+
+    const result = await dynamoDB.get(params).promise();
+
+    if (!result.Item) {
+      return res.status(404).json({
+        mensaje: "Usuario no encontrado"
+      });
+    }
+
+    // Verificar si tiene distintivos
+    if (!result.Item.distintivos || !result.Item.distintivos[eventoId]) {
+      return res.status(404).json({
+        mensaje: "No se encontró distintivo para este usuario en este evento"
+      });
+    }
+
+    // Devolver el distintivo específico del evento
+    const distintivo = {
+      id: `${eventoId}-${userId}`,
+      eventoId,
+      userId,
+      userName: `${result.Item.nombres} ${result.Item.apellidos}`,
+      ...result.Item.distintivos[eventoId]
+    };
+
+    res.json(distintivo);
+  } catch (error) {
+    console.error("Error al obtener distintivo:", error);
+    res.status(500).json({
+      mensaje: "Error al obtener distintivo",
+      error: error.message
+    });
+  }
+});
+
+// Crear un distintivo para un usuario en un evento
+app.post("/api/eventos/:eventoId/distintivo", async (req, res) => {
+  try {
+    const { eventoId } = req.params;
+    const { userId, tipo, valor } = req.body;
+    
+    if (!eventoId || !userId || !tipo || !valor) {
+      return res.status(400).json({
+        mensaje: "Se requieren todos los campos: eventoId, userId, tipo y valor"
+      });
+    }
+
+    // Verificar que el usuario existe
+    const userParams = {
+      TableName: TABLE_USERS,
+      Key: {
+        id: userId
+      }
+    };
+
+    const userResult = await dynamoDB.get(userParams).promise();
+    if (!userResult.Item) {
+      return res.status(404).json({
+        mensaje: "Usuario no encontrado"
+      });
+    }
+
+    // Verificar que el evento existe
+    const eventoParams = {
+      TableName: TABLE_EVENTOS,
+      Key: {
+        id: eventoId
+      }
+    };
+
+    const eventoResult = await dynamoDB.get(eventoParams).promise();
+    if (!eventoResult.Item) {
+      return res.status(404).json({
+        mensaje: "Evento no encontrado"
+      });
+    }
+
+    // Crear o actualizar el distintivo en el usuario
+    const distintivo = {
+      tipo,
+      valor,
+      fechaCreacion: new Date().toISOString()
+    };
+
+    // Verificar si el usuario ya tiene el campo distintivos
+    let updateExpression;
+    let expressionAttributeValues;
+    
+    if (!userResult.Item.distintivos) {
+      // Si no tiene distintivos, crear el mapa con el primer distintivo
+      updateExpression = "SET distintivos = :distintivos";
+      expressionAttributeValues = {
+        ":distintivos": {
+          [eventoId]: distintivo
+        }
+      };
+    } else {
+      // Si ya tiene distintivos, añadir o actualizar el distintivo específico
+      updateExpression = "SET distintivos.#eventoId = :distintivo";
+      expressionAttributeValues = {
+        ":distintivo": distintivo
+      };
+    }
+
+    // Actualizar el campo distintivos en el usuario
+    const updateParams = {
+      TableName: TABLE_USERS,
+      Key: {
+        id: userId
+      },
+      UpdateExpression: updateExpression,
+      ExpressionAttributeValues: expressionAttributeValues,
+      ReturnValues: "ALL_NEW"
+    };
+    
+    // Añadir ExpressionAttributeNames solo si estamos actualizando un distintivo específico
+    if (!userResult.Item.distintivos) {
+      // No necesitamos ExpressionAttributeNames para crear el mapa completo
+    } else {
+      updateParams.ExpressionAttributeNames = {
+        "#eventoId": eventoId
+      };
+    }
+
+    const result = await dynamoDB.update(updateParams).promise();
+    
+    // Preparar la respuesta
+    const distintivoResponse = {
+      id: `${eventoId}-${userId}`,
+      eventoId,
+      userId,
+      userName: `${result.Attributes.nombres} ${result.Attributes.apellidos}`,
+      ...distintivo
+    };
+    
+    res.status(201).json({
+      mensaje: "Distintivo creado con éxito",
+      distintivo: distintivoResponse
+    });
+  } catch (error) {
+    console.error("Error al crear distintivo:", error);
+    res.status(500).json({
+      mensaje: "Error al crear distintivo",
+      error: error.message
+    });
+  }
+});
+
+// Actualizar un distintivo existente
+app.put("/api/eventos/:eventoId/distintivo", async (req, res) => {
+  try {
+    const { eventoId } = req.params;
+    const { userId, tipo, valor } = req.body;
+
+    if (!eventoId || !userId || !tipo || !valor) {
+      return res.status(400).json({
+        mensaje: "Se requieren todos los campos: eventoId, userId, tipo y valor"
+      });
+    }
+
+    // Verificar que el usuario existe
+    const userParams = {
+      TableName: TABLE_USERS,
+      Key: {
+        id: userId
+      }
+    };
+
+    const userResult = await dynamoDB.get(userParams).promise();
+    if (!userResult.Item) {
+      return res.status(404).json({
+        mensaje: "Usuario no encontrado"
+      });
+    }
+
+    // Verificar que el usuario tiene un distintivo para este evento
+    if (!userResult.Item.distintivos || !userResult.Item.distintivos[eventoId]) {
+      return res.status(404).json({
+        mensaje: "No se encontró distintivo para actualizar"
+      });
+    }
+
+    // Actualizar el distintivo en el usuario
+    const distintivo = {
+      tipo,
+      valor,
+      fechaCreacion: userResult.Item.distintivos[eventoId].fechaCreacion,
+      fechaActualizacion: new Date().toISOString()
+    };
+
+    // Actualizar el campo distintivos en el usuario
+    const updateParams = {
+      TableName: TABLE_USERS,
+      Key: {
+        id: userId
+      },
+      UpdateExpression: "SET distintivos.#eventoId = :distintivo",
+      ExpressionAttributeNames: {
+        "#eventoId": eventoId
+      },
+      ExpressionAttributeValues: {
+        ":distintivo": distintivo
+      },
+      ReturnValues: "ALL_NEW"
+    };
+
+    const result = await dynamoDB.update(updateParams).promise();
+
+    // Preparar la respuesta
+    const distintivoResponse = {
+      id: `${eventoId}-${userId}`,
+      eventoId,
+      userId,
+      userName: `${result.Attributes.nombres} ${result.Attributes.apellidos}`,
+      ...distintivo
+    };
+
+    res.json({
+      mensaje: "Distintivo actualizado con éxito",
+      distintivo: distintivoResponse
+    });
+  } catch (error) {
+    console.error("Error al actualizar distintivo:", error);
+    res.status(500).json({
+      mensaje: "Error al actualizar distintivo",
       error: error.message
     });
   }
@@ -1504,7 +1752,7 @@ app.get("/api/menus", async (req, res) => {
   }
 });
 
-// Crear una nueva orden
+// Crear una nueva orden (con validación de distintivo)
 app.post("/api/orders", async (req, res) => {
   try {
     const { userId, eventoId, productos, metodoPago, total, totalMXN, totalTuyos } = req.body;
@@ -1544,6 +1792,16 @@ app.post("/api/orders", async (req, res) => {
         mensaje: "El evento no existe"
       });
     }
+    
+    // Verificar que el usuario tiene un distintivo para este evento
+    if (!userResult.Item.distintivos || !userResult.Item.distintivos[eventoId]) {
+      return res.status(400).json({
+        mensaje: "Debes crear un distintivo antes de realizar un pedido"
+      });
+    }
+    
+    // Incluir el distintivo en la orden
+    const distintivo = userResult.Item.distintivos[eventoId];
     
     // Verificar el saldo si el pago es con Tuyos
     if (metodoPago === 'tuyos') {
@@ -1586,6 +1844,10 @@ app.post("/api/orders", async (req, res) => {
       total,
       totalMXN: totalMXN || 0,
       totalTuyos: totalTuyos || 0,
+      distintivo: {
+        tipo: distintivo.tipo,
+        valor: distintivo.valor
+      },
       estado: "pendiente",
       fechaCreacion: new Date().toISOString(),
       fechaEntrega: null,
@@ -1618,7 +1880,7 @@ app.post("/api/orders", async (req, res) => {
 app.get("/api/users/:userId/orders", async (req, res) => {
   try {
     const userId = req.params.userId;
-    
+
     const params = {
       TableName: TABLE_ORDERS,
       FilterExpression: "userId = :userId",
@@ -1626,10 +1888,10 @@ app.get("/api/users/:userId/orders", async (req, res) => {
         ":userId": userId
       }
     };
-    
+
     const data = await dynamoDB.scan(params).promise();
     res.json(data.Items || []);
-    
+
   } catch (error) {
     console.error("Error al obtener órdenes:", error);
     res.status(500).json({
@@ -1644,13 +1906,13 @@ app.post("/api/orders/:orderId/confirm", async (req, res) => {
   try {
     const orderId = req.params.orderId;
     const { userId, recibido } = req.body;
-    
+
     if (!userId) {
       return res.status(400).json({
         mensaje: "Se requiere el ID del usuario"
       });
     }
-    
+
     // Verificar que la orden existe
     const orderParams = {
       TableName: TABLE_ORDERS,
@@ -1658,21 +1920,21 @@ app.post("/api/orders/:orderId/confirm", async (req, res) => {
         id: orderId
       }
     };
-    
+
     const orderResult = await dynamoDB.get(orderParams).promise();
     if (!orderResult.Item) {
       return res.status(404).json({
         mensaje: "La orden no existe"
       });
     }
-    
+
     // Verificar que la orden pertenezca al usuario
     if (orderResult.Item.userId !== userId) {
       return res.status(403).json({
         mensaje: "No tienes permiso para confirmar esta orden"
       });
     }
-    
+
     // Actualizar el estado de la orden
     const updateParams = {
       TableName: TABLE_ORDERS,
@@ -1687,14 +1949,14 @@ app.post("/api/orders/:orderId/confirm", async (req, res) => {
       },
       ReturnValues: "ALL_NEW"
     };
-    
+
     const result = await dynamoDB.update(updateParams).promise();
-    
+
     res.json({
       mensaje: `Orden ${recibido ? 'confirmada' : 'rechazada'} correctamente`,
       orden: result.Attributes
     });
-    
+
   } catch (error) {
     console.error("Error al confirmar orden:", error);
     res.status(500).json({
