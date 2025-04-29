@@ -815,6 +815,115 @@ app.get("/api/users/:id/transfers", async (req, res) => {
 });
 
 
+// / Endpoint para actualizar parcialmente un usuario (PATCH)
+app.patch("/api/users/:id", async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const updates = req.body;
+    
+    // Validaciones básicas
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ mensaje: "No se proporcionaron datos para actualizar" });
+    }
+    
+    // Verificar si el usuario existe
+    const checkParams = {
+      TableName: TABLE_USERS,
+      Key: {
+        id: userId
+      }
+    };
+    
+    const { Item } = await dynamoDB.get(checkParams).promise();
+    
+    if (!Item) {
+      return res.status(404).json({ mensaje: "Usuario no encontrado" });
+    }
+    
+    // Construir la expresión de actualización de DynamoDB
+    let updateExpression = "set";
+    const expressionAttributeNames = {};
+    const expressionAttributeValues = {};
+    
+    Object.keys(updates).forEach((key, index) => {
+      const attributeName = `#attr${index}`;
+      const attributeValue = `:val${index}`;
+      
+      updateExpression += ` ${attributeName} = ${attributeValue},`;
+      expressionAttributeNames[attributeName] = key;
+      expressionAttributeValues[attributeValue] = updates[key];
+    });
+    
+    // Eliminar la coma final
+    updateExpression = updateExpression.slice(0, -1);
+    
+    const updateParams = {
+      TableName: TABLE_USERS,
+      Key: {
+        id: userId
+      },
+      UpdateExpression: updateExpression,
+      ExpressionAttributeNames: expressionAttributeNames,
+      ExpressionAttributeValues: expressionAttributeValues,
+      ReturnValues: "ALL_NEW"
+    };
+    
+    const updatedData = await dynamoDB.update(updateParams).promise();
+    
+    res.json(updatedData.Attributes);
+  } catch (error) {
+    console.error("Error al actualizar usuario:", error);
+    res.status(500).json({
+      mensaje: "Error al actualizar usuario",
+      error: error.message
+    });
+  }
+});
+
+//    Obtener avataras
+app.get("/api/avatars", (req, res) => {
+  const fs = require('fs');
+  const path = require('path');
+  
+  // Directorio donde se almacenan los avatares
+  const avatarsDir = path.join(__dirname, 'public', 'images', 'avatars');
+  
+  try {
+    // Leer el directorio de avatares
+    fs.readdir(avatarsDir, (err, files) => {
+      if (err) {
+        console.error("Error al leer el directorio de avatares:", err);
+        return res.status(500).json({
+          mensaje: "Error al obtener avatares",
+          error: err.message
+        });
+      }
+      
+      // Filtrar solo archivos de imagen
+      const imageFiles = files.filter(file => {
+        const ext = path.extname(file).toLowerCase();
+        return ['.jpg', '.jpeg', '.png', '.gif', '.webp'].includes(ext);
+      });
+      
+      // Crear array de objetos de avatar
+      const avatars = imageFiles.map((file, index) => {
+        return {
+          id: `avatar${index + 1}`,
+          fileName: file,
+          url: `/images/avatars/${file}`
+        };
+      });
+      
+      res.json(avatars);
+    });
+  } catch (error) {
+    console.error("Error al procesar avatares:", error);
+    res.status(500).json({
+      mensaje: "Error al obtener avatares",
+      error: error.message
+    });
+  }
+});
 //////////////////////////////// Eventos ////////////////////////////////
 // let eventos = [];
 

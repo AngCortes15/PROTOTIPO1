@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tu Perfil - Tantuyo Centro Cultural</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .main-container {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #e9d5ff 0%, #6b21a8 100%);
+      padding-bottom: 2rem;
+    }
+
+    .navbar {
+      background: white;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+      padding: 0.8rem 2rem;
+    }
+
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: transform 0.2s;
+    }
+
+    .navbar-brand:hover {
+      transform: scale(1.02);
+    }
+
+    .brand-logo {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      object-fit: cover;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
+
+    .brand-name {
+      font-weight: 700;
+      font-size: 1.3rem;
+      color: #4a2d8b;
+      margin: 0;
+    }
+
+    .brand-tagline {
+      font-size: 0.8rem;
+      color: #6b7280;
+      margin: 0;
+    }
+
+    /* Estilos para el saldo */
+    .balance-display {
+      background-color: #4a2d8b;
+      border-radius: 50px;
+      color: white;
+      font-weight: 600;
+      padding: 6px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+      margin-right: 20px;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+
+    .balance-display:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .balance-display i {
+      color: gold;
+    }
+
+    .balance-value {
+      letter-spacing: 0.5px;
+    }
+
+    /* Menú desplegable para el saldo */
+    .balance-dropdown {
+      position: relative;
+    }
+
+    .balance-menu {
+      width: 180px;
+      padding: 0;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+      border: none;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .balance-item {
+      padding: 0.8rem 1.2rem;
+      transition: background-color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .balance-item:hover {
+      background-color: #f0f4f8;
+    }
+
+    .balance-item i {
+      color: #4a2d8b;
+    }
+
+    .navbar-items {
+      display: flex;
+      align-items: center;
+    }
+
+    .profile-dropdown {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .profile-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #e9ecef;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      border: 2px solid #f8f9fa;
+      overflow: hidden;
+    }
+
+    .profile-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .dropdown-menu {
+      width: 280px;
+      padding: 0;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+      border: none;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .dropdown-header {
+      padding: 1.2rem;
+      border-bottom: 1px solid #eee;
+      background: #f8f9fa;
+    }
+
+    .dropdown-user-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .dropdown-item {
+      padding: 0.8rem 1.2rem;
+      transition: background-color 0.2s;
+    }
+
+    .dropdown-item:hover {
+      background-color: #f0f4f8;
+    }
+
+    .dropdown-divider {
+      margin: 0;
+    }
+
+    .profile-container {
+      max-width: 800px;
+      margin: 20px auto;
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-header {
+      text-align: center;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #eee;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .large-avatar {
+      width: 150px;
+      height: 150px;
+      border-radius: 75px;
+      margin: 0 auto 15px;
+      background-color: #f8f9fa;
+      border: 3px solid #e9d5ff;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .large-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .edit-avatar {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      background-color: #4a2d8b;
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      transition: all 0.2s;
+    }
+
+    .edit-avatar:hover {
+      transform: scale(1.1);
+    }
+
+    .form-label {
+      font-weight: 600;
+      color: #4a2d8b;
+    }
+
+    .btn-primary {
+      background-color: #4a2d8b;
+      border-color: #4a2d8b;
+      padding: 8px 20px;
+      font-weight: 600;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn-primary:hover {
+      background-color: #3c2372;
+      border-color: #3c2372;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: #6c757d;
+      border-color: #6c757d;
+      padding: 8px 20px;
+      font-weight: 600;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background-color: #5a6268;
+      border-color: #5a6268;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .avatar-selection-modal .modal-content {
+      border-radius: 15px;
+      overflow: hidden;
+    }
+
+    .avatar-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      padding: 15px;
+    }
+
+    .avatar-option {
+      border-radius: 10px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 3px solid transparent;
+      aspect-ratio: 1/1;
+    }
+
+    .avatar-option:hover {
+      transform: scale(1.05);
+    }
+
+    .avatar-option.selected {
+      border-color: #4a2d8b;
+      box-shadow: 0 0 10px rgba(74, 45, 139, 0.5);
+    }
+
+    .avatar-option img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .user-form .form-control {
+      border-radius: 8px;
+      padding: 10px 15px;
+      border: 1px solid #ced4da;
+      transition: all 0.2s;
+    }
+
+    .user-form .form-control:focus {
+      border-color: #4a2d8b;
+      box-shadow: 0 0 0 0.25rem rgba(74, 45, 139, 0.25);
+    }
+
+    .modal-header, .modal-footer {
+      border: none;
+    }
+
+    .modal-title {
+      color: #4a2d8b;
+      font-weight: 600;
+    }
+
+    .alert-success {
+      background-color: #d1fae5;
+      border-color: #a7f3d0;
+      color: #047857;
+      border-radius: 8px;
+    }
+
+    @media (max-width: 768px) {
+      .navbar {
+        padding: 0.8rem 1rem;
+      }
+
+      .navbar-items {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .balance-display {
+        margin-right: 0;
+      }
+
+      .avatar-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="main-container">
+    <!-- Navbar Mejorado con Saldo -->
+    <nav class="navbar navbar-expand-lg">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="dashboard.html">
+          <img
+            src="https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F883171863%2F207532730700%2F1%2Foriginal.20241025-055049?w=512&auto=format%2Ccompress&q=75&sharp=10&rect=74%2C4%2C632%2C632&s=5e6a99698de97f7a0c5f18256bcfd582"
+            alt="Logo Tantuyo" class="brand-logo">
+          <div class="brand-text">
+            <span class="brand-name">Tantuyo</span>
+            <span class="brand-tagline">Centro Cultural</span>
+          </div>
+        </a>
+        <div class="navbar-items ms-auto">
+          <!-- Indicador de Saldo con Menú Desplegable -->
+          <div class="balance-dropdown">
+            <div class="balance-display" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fas fa-coins"></i>
+              <span class="balance-value" id="userBalance">0.00 ₮</span>
+            </div>
+            <ul class="dropdown-menu balance-menu">
+              <li>
+                <a class="balance-item" href="Transferencias.html">
+                  <i class="fas fa-exchange-alt"></i>
+                  <span>Transferir</span>
+                </a>
+              </li>
+              <li>
+                <a class="balance-item" href="Historial.html">
+                  <i class="fas fa-history"></i>
+                  <span>Historial</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <div class="profile-dropdown" id="profileDropdown">
+            <div class="profile-avatar" data-bs-toggle="dropdown" id="navProfileAvatar">
+              <i class="fas fa-user text-secondary"></i>
+            </div>
+            <div class="dropdown-menu dropdown-menu-end">
+              <div class="dropdown-header">
+                <div class="dropdown-user-info">
+                  <div class="profile-avatar" id="dropdownProfileAvatar">
+                    <i class="fas fa-user text-secondary"></i>
+                  </div>
+                  <div>
+                    <h6 class="mb-0" id="nombreCompletoDropdown"></h6>
+                    <small class="text-muted" id="emailDropdown"></small>
+                  </div>
+                </div>
+              </div>
+              <a class="dropdown-item" href="TuPerfil.html"><i class="fas fa-user me-2"></i>Tu perfil</a>
+              <a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Configuración</a>
+              <div class="dropdown-divider"></div>
+              <a class="dropdown-item text-danger" href="#" onclick="cerrarSesion()">
+                <i class="fas fa-sign-out-alt me-2"></i>Cerrar sesión
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Contenedor de Perfil -->
+    <div class="profile-container">
+      <div id="alertContainer"></div>
+      
+      <div class="profile-header">
+        <div class="large-avatar" id="userAvatar">
+          <i class="fas fa-user fa-3x text-secondary"></i>
+        </div>
+        <div class="edit-avatar" title="Editar foto de perfil" data-bs-toggle="modal" data-bs-target="#avatarModal">
+          <i class="fas fa-camera"></i>
+        </div>
+        <h2 class="mt-3" id="nombreCompleto"></h2>
+      </div>
+
+      <form class="user-form" id="profileForm">
+        <div class="row mb-4">
+          <div class="col-md-6 mb-3">
+            <label for="nombres" class="form-label">Nombres</label>
+            <input type="text" class="form-control" id="nombres" name="nombres">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="apellidos" class="form-label">Apellidos</label>
+            <input type="text" class="form-control" id="apellidos" name="apellidos">
+          </div>
+        </div>
+
+        <div class="row mb-4">
+          <div class="col-md-6 mb-3">
+            <label for="edad" class="form-label">Edad</label>
+            <input type="number" class="form-control" id="edad" name="edad">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" name="email" disabled>
+          </div>
+        </div>
+
+        <div class="row mb-4">
+          <div class="col-md-6 mb-3">
+            <label for="whatsapp" class="form-label">WhatsApp</label>
+            <input type="text" class="form-control" id="whatsapp" name="whatsapp">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="instagram" class="form-label">Instagram</label>
+            <input type="text" class="form-control" id="instagram" name="instagram">
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-4">
+          <a href="dashboard.html" class="btn btn-secondary">Cancelar</a>
+          <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal de Selección de Avatar -->
+  <div class="modal fade avatar-selection-modal" id="avatarModal" tabindex="-1" aria-labelledby="avatarModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="avatarModalLabel">Elige tu foto de perfil</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="avatar-grid" id="avatarGrid">
+            <!-- Las imágenes se cargarán dinámicamente con JavaScript -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="saveAvatarBtn">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/config.js"></script>
+  <script>
+    const API_URL = config.API_URL;
+    let selectedAvatar = null;
+    let userData = null;
+
+    async function verificarSesion() {
+      const userId = localStorage.getItem("userId");
+      if (!userId) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_URL}/users/${userId}`);
+        if (!response.ok) {
+          throw new Error("Usuario no encontrado");
+        }
+
+        userData = await response.json();
+        mostrarDatosUsuario(userData);
+        await cargarAvatares();
+      } catch (error) {
+        console.error("Error:", error);
+        localStorage.removeItem("userId");
+        window.location.href = "login.html";
+      }
+    }
+
+    function mostrarDatosUsuario(usuario) {
+      // Dropdown info
+      document.getElementById("nombreCompletoDropdown").textContent =
+        `${usuario.nombres} ${usuario.apellidos}`;
+      document.getElementById("emailDropdown").textContent = usuario.email;
+
+      // Nombre completo en header
+      document.getElementById("nombreCompleto").textContent =
+        `${usuario.nombres} ${usuario.apellidos}`;
+
+      // Datos en el formulario
+      document.getElementById("nombres").value = usuario.nombres || '';
+      document.getElementById("apellidos").value = usuario.apellidos || '';
+      document.getElementById("edad").value = usuario.edad || '';
+      document.getElementById("email").value = usuario.email || '';
+      document.getElementById("whatsapp").value = usuario.whatsapp || '';
+      document.getElementById("instagram").value = usuario.instagram || '';
+
+      // Mostrar saldo con formato
+      const saldo = parseFloat(usuario.saldo || 0).toFixed(2);
+      const balanceElement = document.getElementById("userBalance");
+      balanceElement.textContent = `${saldo} ₮`;
+
+      // Destacar saldo negativo
+      if (parseFloat(saldo) < 0) {
+        balanceElement.classList.add('text-danger');
+      } else {
+        balanceElement.classList.remove('text-danger');
+      }
+    }
+
+    async function cargarAvatares() {
+      try {
+        // Obtener avatares del servidor
+        const response = await fetch(`${API_URL}/avatars`);
+        
+        if (!response.ok) {
+          throw new Error('Error al obtener avatares');
+        }
+        
+        const avatarImages = await response.json();
+        
+        // Guardar en variable global para uso posterior
+        window.avatarImages = avatarImages;
+        
+        const avatarGrid = document.getElementById('avatarGrid');
+        avatarGrid.innerHTML = '';
+
+        avatarImages.forEach(avatar => {
+          const avatarOption = document.createElement('div');
+          avatarOption.className = 'avatar-option';
+          avatarOption.dataset.avatarId = avatar.id;
+          
+          // Si este avatar es el seleccionado actualmente, marcarlo
+          if (userData && userData.avatarId === avatar.id) {
+            avatarOption.classList.add('selected');
+            selectedAvatar = avatar.id;
+          }
+          
+          const img = document.createElement('img');
+          img.src = avatar.url;
+          img.alt = 'Opción de avatar';
+          
+          avatarOption.appendChild(img);
+          avatarGrid.appendChild(avatarOption);
+          
+          // Añadir el evento click
+          avatarOption.addEventListener('click', function() {
+            // Quitar la clase 'selected' de todos
+            document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
+            
+            // Añadir la clase 'selected' al elemento clickeado
+            this.classList.add('selected');
+            
+            // Guardar el id del avatar seleccionado
+            selectedAvatar = this.dataset.avatarId;
+          });
+        });
+        
+        // Si el usuario ya tiene un avatar, mostrarlo
+        if (userData && userData.avatarId) {
+          mostrarAvatar(userData.avatarId);
+        }
+      } catch (error) {
+        console.error('Error al cargar avatares:', error);
+        mostrarAlerta('No se pudieron cargar los avatares', 'danger');
+      }
+    }
+
+    function mostrarAvatar(avatarId) {
+      // Buscar el avatar seleccionado
+      const avatar = window.avatarImages.find(img => img.id === avatarId);
+      
+      if (avatar) {
+        // Reemplazar los iconos de usuario por la imagen en todos los lugares necesarios
+        const avatarContainers = [
+          document.getElementById('userAvatar'),
+          document.getElementById('navProfileAvatar'),
+          document.getElementById('dropdownProfileAvatar')
+        ];
+        
+        avatarContainers.forEach(container => {
+          if (container) {
+            // Limpiar el contenedor
+            container.innerHTML = '';
+            
+            // Crear y añadir la imagen
+            const img = document.createElement('img');
+            img.src = avatar.url;
+            img.alt = 'Avatar de usuario';
+            container.appendChild(img);
+          }
+        });
+        
+        // Guardar el avatarId seleccionado
+        selectedAvatar = avatarId;
+      }
+    }
+
+    // Evento para guardar el avatar seleccionado
+    document.getElementById('saveAvatarBtn').addEventListener('click', async function() {
+      if (selectedAvatar) {
+        try {
+          const userId = localStorage.getItem("userId");
+          
+          // Actualizar el avatar en el backend
+          const response = await fetch(`${API_URL}/users/${userId}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              avatarId: selectedAvatar
+            })
+          });
+          
+          if (!response.ok) {
+            throw new Error('Error al actualizar el avatar');
+          }
+          
+          // Actualizar la UI con el nuevo avatar
+          mostrarAvatar(selectedAvatar);
+          
+          // Cerrar el modal
+          const modal = bootstrap.Modal.getInstance(document.getElementById('avatarModal'));
+          modal.hide();
+          
+          // Mostrar mensaje de éxito
+          mostrarAlerta('Avatar actualizado correctamente', 'success');
+          
+        } catch (error) {
+          console.error('Error:', error);
+          mostrarAlerta('Error al actualizar el avatar', 'danger');
+        }
+      }
+    });
+
+    // Manejar el envío del formulario de perfil
+    document.getElementById('profileForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      try {
+        const userId = localStorage.getItem("userId");
+        
+        // Recoger los datos del formulario
+        const formData = {
+          nombres: document.getElementById('nombres').value,
+          apellidos: document.getElementById('apellidos').value,
+          edad: document.getElementById('edad').value,
+          whatsapp: document.getElementById('whatsapp').value,
+          instagram: document.getElementById('instagram').value
+        };
+        
+        // Actualizar los datos en el backend
+        const response = await fetch(`${API_URL}/users/${userId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData)
+        });
+        
+        if (!response.ok) {
+          throw new Error('Error al actualizar el perfil');
+        }
+        
+        // Mostrar mensaje de éxito
+        mostrarAlerta('Perfil actualizado correctamente', 'success');
+        
+        // Actualizar datos locales
+        userData = {...userData, ...formData};
+        
+      } catch (error) {
+        console.error('Error:', error);
+        mostrarAlerta('Error al actualizar el perfil', 'danger');
+      }
+    });
+
+    function mostrarAlerta(mensaje, tipo) {
+      const alertContainer = document.getElementById('alertContainer');
+      
+      // Crear la alerta
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert alert-${tipo} alert-dismissible fade show`;
+      alertDiv.role = 'alert';
+      
+      alertDiv.innerHTML = `
+        ${mensaje}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      `;
+      
+      // Añadir al contenedor
+      alertContainer.innerHTML = '';
+      alertContainer.appendChild(alertDiv);
+      
+      // Eliminar automáticamente después de 5 segundos
+      setTimeout(() => {
+        const alert = bootstrap.Alert.getOrCreateInstance(alertDiv);
+        alert.close();
+      }, 5000);
+    }
+
+    function cerrarSesion() {
+      localStorage.removeItem("userId");
+      window.location.href = "index.html";
+    }
+
+    verificarSesion();
+  </script>
+</body>
+
+</html>
