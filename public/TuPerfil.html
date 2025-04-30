@@ -770,13 +770,67 @@
         // Configurar búsqueda
         configurarBusqueda();
 
-        // Renderizar todos los avatares por defecto
-        renderizarAvatares(window.avatarImages);
+        const avatarGrid = document.getElementById('avatarGrid');
+        avatarGrid.innerHTML = '';
 
-        // Si el usuario ya tiene un animal espiritual, mostrar el avatar
+        avatarImages.forEach(avatar => {
+          const avatarOption = document.createElement('div');
+          avatarOption.className = 'avatar-option';
+          avatarOption.dataset.avatarId = avatar.id;
+
+          // Extraer nombre del animal
+          const fileName = avatar.fileName.split('.')[0];
+          const animalName = fileName.replace(/[-_]/g, ' ');
+
+          // Si este avatar es el seleccionado actualmente, marcarlo
+          if (userData && userData.animalEspiritual) {
+            // Normalizar ambos nombres para comparación
+            const normalizedUserAnimal = userData.animalEspiritual.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '');
+            const normalizedAnimalName = animalName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '');
+
+            if (normalizedUserAnimal === normalizedAnimalName) {
+              avatarOption.classList.add('selected');
+              selectedAvatar = avatar.id;
+            }
+          }
+
+          // Contenedor para la imagen
+          const imgContainer = document.createElement('div');
+          imgContainer.className = 'avatar-img-container';
+
+          const img = document.createElement('img');
+          img.src = avatar.url;
+          img.alt = animalName;
+
+          imgContainer.appendChild(img);
+
+          // Elemento para el nombre
+          const nameElement = document.createElement('div');
+          nameElement.className = 'avatar-name';
+          nameElement.textContent = animalName;
+
+          avatarOption.appendChild(imgContainer);
+          avatarOption.appendChild(nameElement);
+          avatarGrid.appendChild(avatarOption);
+
+          // Añadir el evento click
+          avatarOption.addEventListener('click', function () {
+            // Quitar la clase 'selected' de todos
+            document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
+
+            // Añadir la clase 'selected' al elemento clickeado
+            this.classList.add('selected');
+
+            // Guardar el id del avatar seleccionado
+            selectedAvatar = this.dataset.avatarId;
+          });
+        });
+
+        // Mostrar el avatar actual del usuario
         if (userData && userData.animalEspiritual) {
           mostrarAvatarPorNombre(userData.animalEspiritual);
         }
+
       } catch (error) {
         console.error('Error al cargar avatares:', error);
         mostrarAlerta('No se pudieron cargar los avatares', 'danger');
@@ -905,10 +959,23 @@
         avatarOption.className = 'avatar-option';
         avatarOption.dataset.avatarId = avatar.id;
 
+        // Extraer nombre del animal
+        let animalName = avatar.name;
+        if (!animalName && avatar.url) {
+          const fileName = avatar.url.split('/').pop().split('.')[0];
+          animalName = fileName.replace(/[-_]/g, ' ');
+        }
+
         // Si este avatar es el seleccionado actualmente, marcarlo
-        if (userData && userData.avatarId === avatar.id) {
-          avatarOption.classList.add('selected');
-          selectedAvatar = avatar.id;
+        if (userData && userData.animalEspiritual) {
+          // Normalizar ambos nombres para comparación
+          const normalizedUserAnimal = userData.animalEspiritual.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '');
+          const normalizedAnimalName = animalName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '');
+
+          if (normalizedUserAnimal === normalizedAnimalName) {
+            avatarOption.classList.add('selected');
+            selectedAvatar = avatar.id;
+          }
         }
 
         // Contenedor para la imagen
@@ -917,14 +984,14 @@
 
         const img = document.createElement('img');
         img.src = avatar.url;
-        img.alt = avatar.name;
+        img.alt = animalName;
 
         imgContainer.appendChild(img);
 
         // Elemento para el nombre
         const nameElement = document.createElement('div');
         nameElement.className = 'avatar-name';
-        nameElement.textContent = avatar.name;
+        nameElement.textContent = animalName;
 
         avatarOption.appendChild(imgContainer);
         avatarOption.appendChild(nameElement);
@@ -975,44 +1042,34 @@
     }
 
     function mostrarAvatar(avatarId) {
+      // Esta función ya no debería usarse, pero la mantenemos para compatibilidad
       // Buscar el avatar seleccionado
       const avatar = window.avatarImages.find(img => img.id === avatarId);
 
       if (avatar) {
-        // Reemplazar los iconos de usuario por la imagen en todos los lugares necesarios
-        const avatarContainers = [
-          document.getElementById('userAvatar'),
-          document.getElementById('navProfileAvatar'),
-          document.getElementById('dropdownProfileAvatar')
-        ];
+        // Extraer nombre del animal del archivo
+        const fileName = avatar.fileName.split('.')[0];
+        const animalName = fileName.replace(/[-_]/g, ' ');
 
-        avatarContainers.forEach(container => {
-          if (container) {
-            // Limpiar el contenedor
-            container.innerHTML = '';
-
-            // Crear y añadir la imagen
-            const img = document.createElement('img');
-            img.src = avatar.url;
-            img.alt = 'Avatar de usuario';
-            container.appendChild(img);
-          }
-        });
-
-        // Guardar el avatarId seleccionado
-        selectedAvatar = avatarId;
+        // Usar la función que muestra por nombre
+        mostrarAvatarPorNombre(animalName);
       }
     }
 
     function mostrarAvatarPorNombre(nombreAnimal) {
-      if (!window.avatarImages) return;
+      if (!window.avatarImages || !nombreAnimal) return;
+
+      // Normalizar el nombre del animal para la comparación
+      const nombreFormateado = nombreAnimal.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '');
 
       // Buscar el avatar por nombre
-      const nombreFormateado = nombreAnimal.toLowerCase().replace(/\s+/g, '');
-
       const avatar = window.avatarImages.find(img => {
-        const fileName = img.fileName.split('.')[0].toLowerCase();
-        return fileName === nombreFormateado || fileName.replace(/\s+/g, '') === nombreFormateado;
+        // Extraer nombre del archivo
+        const fileName = img.fileName.split('.')[0];
+        // Normalizar nombre del archivo de la misma manera
+        const fileNameNormalized = fileName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[-_]/g, '').replace(/\s+/g, '');
+
+        return fileNameNormalized === nombreFormateado;
       });
 
       if (avatar) {
@@ -1053,7 +1110,7 @@
           const fileName = avatar.fileName.split('.')[0];
           const animalEspiritual = fileName.replace(/[-_]/g, ' ');
 
-          // Actualizar el animal espiritual en el backend (ya no avatarId)
+          // Actualizar el animal espiritual en el backend
           const response = await fetch(`${API_URL}/users/${userId}`, {
             method: 'PATCH',
             headers: {

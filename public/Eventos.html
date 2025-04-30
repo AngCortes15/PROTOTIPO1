@@ -1703,7 +1703,7 @@
 
         // Variable para avatar por defecto
         let defaultAvatarUrl = 'https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F883171863%2F207532730700%2F1%2Foriginal.20241025-055049?w=512&auto=format%2Ccompress&q=75&sharp=10&rect=74%2C4%2C632%2C632&s=5e6a99698de97f7a0c5f18256bcfd582';
-        // Función para mostrar el modal de asistentes
+
         // Función para mostrar el modal de asistentes
         async function mostrarAsistentes(eventoId, eventoNombre) {
             const modal = document.getElementById('attendeesModalBackdrop');
@@ -1841,9 +1841,16 @@
                     // Determinar URL del avatar
                     let avatarUrl = defaultAvatarUrl;
 
-                    // Usar la función para obtener avatar
-                    if (usuario.avatarId && window.avatarImages) {
-                        const avatar = window.avatarImages.find(img => img.id === usuario.avatarId);
+                    // Usar el animalEspiritual en lugar de avatarId
+                    if (usuario.animalEspiritual && window.avatarImages) {
+                        // Buscar el avatar que coincida con el nombre del animal
+                        const nombreFormateado = usuario.animalEspiritual.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '');
+
+                        const avatar = window.avatarImages.find(img => {
+                            const fileName = img.fileName.split('.')[0].toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                            return fileName === nombreFormateado || fileName.replace(/[_-]/g, '').replace(/\s+/g, '') === nombreFormateado;
+                        });
+
                         if (avatar) {
                             avatarUrl = avatar.url;
                         }
@@ -1881,7 +1888,7 @@
         `;
             }
         }
-        // Función para cargar avatares (similar a la de TuPerfil.html)
+
         async function cargarAvatares() {
             try {
                 // Obtener avatares del servidor
