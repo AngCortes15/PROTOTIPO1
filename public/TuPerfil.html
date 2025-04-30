@@ -328,7 +328,8 @@
       box-shadow: 0 0 0 0.25rem rgba(74, 45, 139, 0.25);
     }
 
-    .modal-header, .modal-footer {
+    .modal-header,
+    .modal-footer {
       border: none;
     }
 
@@ -342,6 +343,109 @@
       border-color: #a7f3d0;
       color: #047857;
       border-radius: 8px;
+    }
+
+    /* Estilos para la búsqueda y categorías */
+    .avatar-search-container {
+      margin-bottom: 15px;
+    }
+
+    .avatar-search-bar {
+      position: relative;
+      margin-bottom: 10px;
+    }
+
+    .avatar-search-bar input {
+      padding-left: 40px;
+      border-radius: 20px;
+      border: 1px solid #ced4da;
+      padding: 8px 15px 8px 40px;
+      width: 100%;
+    }
+
+    .avatar-search-bar i {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6c757d;
+    }
+
+    .avatar-categories {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+
+    .avatar-category {
+      background-color: #f0f0f0;
+      border-radius: 20px;
+      padding: 5px 15px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .avatar-category:hover {
+      background-color: #e0e0e0;
+    }
+
+    .avatar-category.active {
+      background-color: #4a2d8b;
+      color: white;
+    }
+
+    /* Grid de avatares con nombres */
+    .avatar-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      padding: 15px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .avatar-option {
+      display: flex;
+      flex-direction: column;
+      border-radius: 10px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 3px solid transparent;
+    }
+
+    .avatar-option .avatar-img-container {
+      aspect-ratio: 1/1;
+      overflow: hidden;
+    }
+
+    .avatar-option img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .avatar-option .avatar-name {
+      text-align: center;
+      padding: 5px;
+      font-size: 0.8rem;
+      background-color: #f8f9fa;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Botón flotante de guardar */
+    .modal-floating-footer {
+      position: sticky;
+      bottom: 0;
+      background-color: white;
+      padding: 10px;
+      border-top: 1px solid #dee2e6;
+      text-align: right;
+      z-index: 10;
     }
 
     @media (max-width: 768px) {
@@ -433,7 +537,7 @@
     <!-- Contenedor de Perfil -->
     <div class="profile-container">
       <div id="alertContainer"></div>
-      
+
       <div class="profile-header">
         <div class="large-avatar" id="userAvatar">
           <i class="fas fa-user fa-3x text-secondary"></i>
@@ -478,6 +582,14 @@
           </div>
         </div>
 
+        <div class="row mb-4">
+          <div class="col-md-12 mb-3">
+            <label for="animalEspiritual" class="form-label">Animal Espiritual</label>
+            <input type="text" class="form-control" id="animalEspiritual" name="animalEspiritual" readonly>
+            <small class="text-muted">Este campo se actualiza al elegir un avatar</small>
+          </div>
+        </div>
+
         <div class="d-flex justify-content-end gap-2 mt-4">
           <a href="dashboard.html" class="btn btn-secondary">Cancelar</a>
           <button type="submit" class="btn btn-primary">Guardar Cambios</button>
@@ -487,7 +599,8 @@
   </div>
 
   <!-- Modal de Selección de Avatar -->
-  <div class="modal fade avatar-selection-modal" id="avatarModal" tabindex="-1" aria-labelledby="avatarModalLabel" aria-hidden="true">
+  <div class="modal fade avatar-selection-modal" id="avatarModal" tabindex="-1" aria-labelledby="avatarModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
       <div class="modal-content">
         <div class="modal-header">
@@ -495,13 +608,22 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
+          <div class="avatar-search-container">
+            <div class="avatar-search-bar">
+              <i class="fas fa-search"></i>
+              <input type="text" id="avatarSearchInput" class="form-control" placeholder="Buscar por nombre...">
+            </div>
+            <div class="avatar-categories" id="avatarCategories">
+              <!-- Las categorías se cargarán dinámicamente -->
+            </div>
+          </div>
           <div class="avatar-grid" id="avatarGrid">
             <!-- Las imágenes se cargarán dinámicamente con JavaScript -->
           </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="button" class="btn btn-primary" id="saveAvatarBtn">Guardar</button>
+          <div class="modal-floating-footer">
+            <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-primary" id="saveAvatarBtn">Guardar</button>
+          </div>
         </div>
       </div>
     </div>
@@ -554,6 +676,7 @@
       document.getElementById("email").value = usuario.email || '';
       document.getElementById("whatsapp").value = usuario.whatsapp || '';
       document.getElementById("instagram").value = usuario.instagram || '';
+      document.getElementById("animalEspiritual").value = usuario.animalEspiritual || '';
 
       // Mostrar saldo con formato
       const saldo = parseFloat(usuario.saldo || 0).toFixed(2);
@@ -566,59 +689,93 @@
       } else {
         balanceElement.classList.remove('text-danger');
       }
+
+      // Si tiene animal espiritual, mostrar el avatar correspondiente
+      if (usuario.animalEspiritual) {
+        mostrarAvatarPorNombre(usuario.animalEspiritual);
+      }
     }
+
+    // Configuración para clasificar avatares
+    // Configuración para clasificar avatares
+    const animalCategories = {
+      'Mamíferos': [
+        'Aardvark', 'Alce', 'Alpaca', 'Antílope', 'Ardilla', 'Armadillo', 'Aye-Aye', 'Babuino',
+        'Ballena', 'Beluga', 'Borrego', 'Búfalo', 'Caballo', 'Cabra', 'Cacomixtle', 'Camello',
+        'Canguro', 'Capibara', 'Caracal', 'Castor', 'Cebra', 'Cerdo', 'Chimpancé', 'Chita',
+        'Ciervo', 'Civeta', 'Coati', 'Conejo', 'Coyote', 'Cuy', 'Delfín', 'Dhole', 'Elefante',
+        'Erizo', 'Foca', 'Gacela', 'Gato', 'Gibón', 'Gorilla', 'Guanaco', 'Guepardo', 'Hámster',
+        'Hiena', 'Hipopótamo', 'Hurón', 'Impala', 'Jabalí', 'Jaguar', 'Jirafa', 'Koala', 'Leopardo',
+        'León', 'Liebre', 'Lince', 'Llama', 'Lobo', 'Lémur', 'Manatí', 'Mangosta', 'Mapache',
+        'Margay', 'Marmota', 'Mico', 'Mini Cerdo', 'Mono', 'Morsa', 'Muntjac', 'Murciélago',
+        'Musaraña', 'Narval', 'Nutria', 'Ocelote', 'Okapi', 'Orangután', 'Orca', 'Oricteropo',
+        'Oso', 'Oveja', 'Panda', 'Pangolín', 'Pantera', 'Perro', 'Pony', 'Puercoespín', 'Puma',
+        'Quokka', 'Rata', 'Ratel', 'Ratón', 'Rinoceronte', 'Serval', 'Sifaka', 'Solenodon',
+        'Suricata', 'Tapir', 'Tarsero', 'Tejón', 'Teporingo', 'Tigre', 'Tigrillo', 'Tití',
+        'Tlacuache', 'Topo', 'Vaca', 'Vaquita Marina', 'Wallaby', 'Wombat', 'Xoloitzcuintle',
+        'Zarigüeya', 'Zorrillo', 'Zorro', 'Íbice', 'Ñu', 'Órix'
+      ],
+      'Aves': [
+        'Aguililla', 'Avestruz', 'Buitre', 'Búho', 'Cacatúa', 'Canario', 'Caracaraç', 'Casuario',
+        'Cenzontle', 'Cigüeña', 'Cisne', 'Codorniz', 'Colibrí', 'Colobo', 'Cotorra', 'Cuervo',
+        'Cóndor', 'Faisán', 'Flamenco', 'Frailecillo', 'Gallina', 'Gallo', 'Garza', 'Gavilán',
+        'Gaviota', 'Gorrión', 'Grulla', 'Guacamaya', 'Halcón', 'Ibis', 'Jabirú', 'Kakapo',
+        'Lechuza', 'Loro', 'Marabú', 'Moa', 'Oropéndola', 'Paloma', 'Pato', 'Pavo', 'Pelícano',
+        'Perdiz', 'Perico', 'Periquito', 'Pingüino', 'Quetzal', 'Saltarín', 'Seriema', 'Sinsonte',
+        'Tecolote', 'Trepador', 'Tucán', 'Turaco', 'Tórtola', 'Uakari', 'Urraca', 'Zopilote',
+        'Águila', 'Ñandú', 'Pájaro'
+      ],
+      'Reptiles': [
+        'Ajolote', 'Ameiva', 'Anaconda', 'Basilisco', 'Boa', 'Caguama', 'Caimán', 'Camaleón',
+        'Cocodrilo', 'Cobra', 'Coralillo', 'Culebra', 'Drágon', 'Galápago', 'Gecko', 'Iguana',
+        'Lagarto', 'Pogona', 'Serpiente', 'Tortuga', 'Varano'
+      ],
+      'Anfibios': [
+        'Rana', 'Salamandra', 'Sapo'
+      ],
+      'Peces': [
+        'Hipocampo', 'Mantarraya', 'Pez', 'Piraña', 'Sargo', 'Tiburón'
+      ],
+      'Invertebrados': [
+        'Alacrán', 'Avispa', 'Calamar', 'Camarón', 'Cangrego', 'Cangrejo', 'Caracol', 'Chinche',
+        'Escarabajo', 'Escorpión', 'Estrella de mar', 'Grillo', 'Hormiga', 'Libélula', 'Luciérnaga',
+        'Mantis', 'Mariposa', 'Medusa', 'Mosca', 'Mosquito', 'Nudibranquio', 'Oruga', 'Pulpo',
+        'Saltamontes', 'Tarántula', 'Tábano'
+      ],
+      'Míticos': [
+        'Fénix'
+      ]
+    };
 
     async function cargarAvatares() {
       try {
         // Obtener avatares del servidor
         const response = await fetch(`${API_URL}/avatars`);
-        
+
         if (!response.ok) {
           throw new Error('Error al obtener avatares');
         }
-        
+
         const avatarImages = await response.json();
-        
+
         // Guardar en variable global para uso posterior
         window.avatarImages = avatarImages;
-        
-        const avatarGrid = document.getElementById('avatarGrid');
-        avatarGrid.innerHTML = '';
 
-        avatarImages.forEach(avatar => {
-          const avatarOption = document.createElement('div');
-          avatarOption.className = 'avatar-option';
-          avatarOption.dataset.avatarId = avatar.id;
-          
-          // Si este avatar es el seleccionado actualmente, marcarlo
-          if (userData && userData.avatarId === avatar.id) {
-            avatarOption.classList.add('selected');
-            selectedAvatar = avatar.id;
-          }
-          
-          const img = document.createElement('img');
-          img.src = avatar.url;
-          img.alt = 'Opción de avatar';
-          
-          avatarOption.appendChild(img);
-          avatarGrid.appendChild(avatarOption);
-          
-          // Añadir el evento click
-          avatarOption.addEventListener('click', function() {
-            // Quitar la clase 'selected' de todos
-            document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
-            
-            // Añadir la clase 'selected' al elemento clickeado
-            this.classList.add('selected');
-            
-            // Guardar el id del avatar seleccionado
-            selectedAvatar = this.dataset.avatarId;
-          });
-        });
-        
-        // Si el usuario ya tiene un avatar, mostrarlo
-        if (userData && userData.avatarId) {
-          mostrarAvatar(userData.avatarId);
+        // Procesar los datos de los avatares para añadir categorías
+        window.avatarImages = procesarDatosAvatares(avatarImages);
+
+        // Cargar las categorías en el UI
+        cargarCategorias();
+
+        // Configurar búsqueda
+        configurarBusqueda();
+
+        // Renderizar todos los avatares por defecto
+        renderizarAvatares(window.avatarImages);
+
+        // Si el usuario ya tiene un animal espiritual, mostrar el avatar
+        if (userData && userData.animalEspiritual) {
+          mostrarAvatarPorNombre(userData.animalEspiritual);
         }
       } catch (error) {
         console.error('Error al cargar avatares:', error);
@@ -626,10 +783,201 @@
       }
     }
 
+    function procesarDatosAvatares(avatares) {
+      return avatares.map(avatar => {
+        // Extraer nombre del archivo de la URL
+        const urlParts = avatar.url.split('/');
+        const fileName = urlParts[urlParts.length - 1]; // Obtener última parte de la URL
+
+        // Quitar extensión y formatear nombre
+        let name = fileName.split('.')[0];
+
+        // Determinar la categoría
+        let category = 'Otros';
+
+        // Comprobar en qué categoría encaja
+        categoryLoop:
+        for (const [cat, animals] of Object.entries(animalCategories)) {
+          for (const animal of animals) {
+            // Comprobar si el nombre contiene el animal (como palabra completa o al principio)
+            if (name === animal ||
+              name.startsWith(animal + ' ') ||
+              name.includes(' ' + animal)) {
+              category = cat;
+              break categoryLoop;
+            }
+          }
+        }
+
+        // Casos especiales para nombres compuestos (por ejemplo, "Pez León")
+        if (category === 'Otros') {
+          if (name.startsWith('Pez ')) {
+            category = 'Peces';
+          } else if (name.startsWith('Pájaro ')) {
+            category = 'Aves';
+          }
+        }
+
+        return {
+          ...avatar,
+          name: name,
+          category: category
+        };
+      });
+    }
+
+    function cargarCategorias() {
+      const categoriesContainer = document.getElementById('avatarCategories');
+      categoriesContainer.innerHTML = '';
+
+      // Añadir categoría "Todos"
+      const allCategory = document.createElement('div');
+      allCategory.className = 'avatar-category active';
+      allCategory.dataset.category = 'all';
+      allCategory.textContent = 'Todos';
+      categoriesContainer.appendChild(allCategory);
+
+      // Obtener categorías únicas de los avatares
+      const uniqueCategories = [...new Set(window.avatarImages.map(avatar => avatar.category))];
+
+      // Crear elementos para cada categoría
+      uniqueCategories.forEach(category => {
+        const categoryElement = document.createElement('div');
+        categoryElement.className = 'avatar-category';
+        categoryElement.dataset.category = category;
+        categoryElement.textContent = category;
+        categoriesContainer.appendChild(categoryElement);
+      });
+
+      // Añadir eventos click a las categorías
+      document.querySelectorAll('.avatar-category').forEach(category => {
+        category.addEventListener('click', function () {
+          // Quitar clase active de todas las categorías
+          document.querySelectorAll('.avatar-category').forEach(cat => {
+            cat.classList.remove('active');
+          });
+
+          // Añadir clase active a la categoría clickeada
+          this.classList.add('active');
+
+          // Filtrar avatares por categoría
+          const selectedCategory = this.dataset.category;
+          let filteredAvatars;
+
+          if (selectedCategory === 'all') {
+            filteredAvatars = window.avatarImages;
+          } else {
+            filteredAvatars = window.avatarImages.filter(avatar =>
+              avatar.category === selectedCategory
+            );
+          }
+
+          // Aplicar también el filtro de búsqueda actual
+          const searchTerm = document.getElementById('avatarSearchInput').value.toLowerCase();
+          if (searchTerm) {
+            filteredAvatars = filteredAvatars.filter(avatar =>
+              avatar.name.toLowerCase().includes(searchTerm)
+            );
+          }
+
+          renderizarAvatares(filteredAvatars);
+        });
+      });
+    }
+
+    function renderizarAvatares(avatares) {
+      const avatarGrid = document.getElementById('avatarGrid');
+      avatarGrid.innerHTML = '';
+
+      if (avatares.length === 0) {
+        const noResults = document.createElement('div');
+        noResults.className = 'text-center p-4 w-100';
+        noResults.innerHTML = '<i class="fas fa-search fa-2x mb-2 text-muted"></i><p>No se encontraron resultados</p>';
+        avatarGrid.appendChild(noResults);
+        return;
+      }
+
+      // Ordenar avatares por nombre
+      avatares.sort((a, b) => a.name.localeCompare(b.name, 'es'));
+
+      avatares.forEach(avatar => {
+        const avatarOption = document.createElement('div');
+        avatarOption.className = 'avatar-option';
+        avatarOption.dataset.avatarId = avatar.id;
+
+        // Si este avatar es el seleccionado actualmente, marcarlo
+        if (userData && userData.avatarId === avatar.id) {
+          avatarOption.classList.add('selected');
+          selectedAvatar = avatar.id;
+        }
+
+        // Contenedor para la imagen
+        const imgContainer = document.createElement('div');
+        imgContainer.className = 'avatar-img-container';
+
+        const img = document.createElement('img');
+        img.src = avatar.url;
+        img.alt = avatar.name;
+
+        imgContainer.appendChild(img);
+
+        // Elemento para el nombre
+        const nameElement = document.createElement('div');
+        nameElement.className = 'avatar-name';
+        nameElement.textContent = avatar.name;
+
+        avatarOption.appendChild(imgContainer);
+        avatarOption.appendChild(nameElement);
+        avatarGrid.appendChild(avatarOption);
+
+        // Añadir el evento click
+        avatarOption.addEventListener('click', function () {
+          // Quitar la clase 'selected' de todos
+          document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
+
+          // Añadir la clase 'selected' al elemento clickeado
+          this.classList.add('selected');
+
+          // Guardar el id del avatar seleccionado
+          selectedAvatar = this.dataset.avatarId;
+        });
+      });
+    }
+
+    function configurarBusqueda() {
+      const searchInput = document.getElementById('avatarSearchInput');
+
+      searchInput.addEventListener('input', function () {
+        const searchTerm = this.value.toLowerCase();
+
+        // Obtener la categoría actualmente seleccionada
+        const activeCategory = document.querySelector('.avatar-category.active').dataset.category;
+
+        // Filtrar primero por categoría
+        let filteredAvatars;
+        if (activeCategory === 'all') {
+          filteredAvatars = window.avatarImages;
+        } else {
+          filteredAvatars = window.avatarImages.filter(avatar =>
+            avatar.category === activeCategory
+          );
+        }
+
+        // Luego aplicar el filtro de búsqueda
+        if (searchTerm) {
+          filteredAvatars = filteredAvatars.filter(avatar =>
+            avatar.name.toLowerCase().includes(searchTerm)
+          );
+        }
+
+        renderizarAvatares(filteredAvatars);
+      });
+    }
+
     function mostrarAvatar(avatarId) {
       // Buscar el avatar seleccionado
       const avatar = window.avatarImages.find(img => img.id === avatarId);
-      
+
       if (avatar) {
         // Reemplazar los iconos de usuario por la imagen en todos los lugares necesarios
         const avatarContainers = [
@@ -637,12 +985,12 @@
           document.getElementById('navProfileAvatar'),
           document.getElementById('dropdownProfileAvatar')
         ];
-        
+
         avatarContainers.forEach(container => {
           if (container) {
             // Limpiar el contenedor
             container.innerHTML = '';
-            
+
             // Crear y añadir la imagen
             const img = document.createElement('img');
             img.src = avatar.url;
@@ -650,57 +998,106 @@
             container.appendChild(img);
           }
         });
-        
+
         // Guardar el avatarId seleccionado
         selectedAvatar = avatarId;
       }
     }
 
+    function mostrarAvatarPorNombre(nombreAnimal) {
+      if (!window.avatarImages) return;
+
+      // Buscar el avatar por nombre
+      const nombreFormateado = nombreAnimal.toLowerCase().replace(/\s+/g, '');
+
+      const avatar = window.avatarImages.find(img => {
+        const fileName = img.fileName.split('.')[0].toLowerCase();
+        return fileName === nombreFormateado || fileName.replace(/\s+/g, '') === nombreFormateado;
+      });
+
+      if (avatar) {
+        // Reemplazar los iconos de usuario por la imagen en todos los lugares necesarios
+        const avatarContainers = [
+          document.getElementById('userAvatar'),
+          document.getElementById('navProfileAvatar'),
+          document.getElementById('dropdownProfileAvatar')
+        ];
+
+        avatarContainers.forEach(container => {
+          if (container) {
+            // Limpiar el contenedor
+            container.innerHTML = '';
+
+            // Crear y añadir la imagen
+            const img = document.createElement('img');
+            img.src = avatar.url;
+            img.alt = 'Avatar de usuario';
+            container.appendChild(img);
+          }
+        });
+      }
+    }
+
     // Evento para guardar el avatar seleccionado
-    document.getElementById('saveAvatarBtn').addEventListener('click', async function() {
+    document.getElementById('saveAvatarBtn').addEventListener('click', async function () {
       if (selectedAvatar) {
         try {
           const userId = localStorage.getItem("userId");
-          
-          // Actualizar el avatar en el backend
+          const avatar = window.avatarImages.find(img => img.id === selectedAvatar);
+
+          if (!avatar) {
+            throw new Error('Avatar no encontrado');
+          }
+
+          // Extraer nombre del animal del archivo
+          const fileName = avatar.fileName.split('.')[0];
+          const animalEspiritual = fileName.replace(/[-_]/g, ' ');
+
+          // Actualizar el animal espiritual en el backend (ya no avatarId)
           const response = await fetch(`${API_URL}/users/${userId}`, {
             method: 'PATCH',
             headers: {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              avatarId: selectedAvatar
+              animalEspiritual: animalEspiritual
             })
           });
-          
+
           if (!response.ok) {
-            throw new Error('Error al actualizar el avatar');
+            throw new Error('Error al actualizar el animal espiritual');
           }
-          
+
+          // Actualizar datos locales
+          userData.animalEspiritual = animalEspiritual;
+
           // Actualizar la UI con el nuevo avatar
-          mostrarAvatar(selectedAvatar);
-          
+          mostrarAvatarPorNombre(animalEspiritual);
+
+          // Actualizar el campo en el formulario
+          document.getElementById("animalEspiritual").value = animalEspiritual;
+
           // Cerrar el modal
           const modal = bootstrap.Modal.getInstance(document.getElementById('avatarModal'));
           modal.hide();
-          
+
           // Mostrar mensaje de éxito
-          mostrarAlerta('Avatar actualizado correctamente', 'success');
-          
+          mostrarAlerta('Animal espiritual actualizado correctamente', 'success');
+
         } catch (error) {
           console.error('Error:', error);
-          mostrarAlerta('Error al actualizar el avatar', 'danger');
+          mostrarAlerta('Error al actualizar el animal espiritual', 'danger');
         }
       }
     });
 
     // Manejar el envío del formulario de perfil
-    document.getElementById('profileForm').addEventListener('submit', async function(e) {
+    document.getElementById('profileForm').addEventListener('submit', async function (e) {
       e.preventDefault();
-      
+
       try {
         const userId = localStorage.getItem("userId");
-        
+
         // Recoger los datos del formulario
         const formData = {
           nombres: document.getElementById('nombres').value,
@@ -709,7 +1106,7 @@
           whatsapp: document.getElementById('whatsapp').value,
           instagram: document.getElementById('instagram').value
         };
-        
+
         // Actualizar los datos en el backend
         const response = await fetch(`${API_URL}/users/${userId}`, {
           method: 'PATCH',
@@ -718,17 +1115,17 @@
           },
           body: JSON.stringify(formData)
         });
-        
+
         if (!response.ok) {
           throw new Error('Error al actualizar el perfil');
         }
-        
+
         // Mostrar mensaje de éxito
         mostrarAlerta('Perfil actualizado correctamente', 'success');
-        
+
         // Actualizar datos locales
-        userData = {...userData, ...formData};
-        
+        userData = { ...userData, ...formData };
+
       } catch (error) {
         console.error('Error:', error);
         mostrarAlerta('Error al actualizar el perfil', 'danger');
@@ -737,21 +1134,21 @@
 
     function mostrarAlerta(mensaje, tipo) {
       const alertContainer = document.getElementById('alertContainer');
-      
+
       // Crear la alerta
       const alertDiv = document.createElement('div');
       alertDiv.className = `alert alert-${tipo} alert-dismissible fade show`;
       alertDiv.role = 'alert';
-      
+
       alertDiv.innerHTML = `
         ${mensaje}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       `;
-      
+
       // Añadir al contenedor
       alertContainer.innerHTML = '';
       alertContainer.appendChild(alertDiv);
-      
+
       // Eliminar automáticamente después de 5 segundos
       setTimeout(() => {
         const alert = bootstrap.Alert.getOrCreateInstance(alertDiv);

@@ -142,13 +142,15 @@
       justify-content: center;
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
       border: 2px solid #f8f9fa;
-      overflow: hidden; /* Para recortar la imagen al tamaño del contenedor */
+      overflow: hidden;
+      /* Para recortar la imagen al tamaño del contenedor */
     }
 
     .profile-avatar img {
       width: 100%;
       height: 100%;
-      object-fit: cover; /* Para mantener la proporción de la imagen */
+      object-fit: cover;
+      /* Para mantener la proporción de la imagen */
     }
 
     .dropdown-menu {
@@ -210,7 +212,8 @@
       background-color: #f8f9fa;
       border: 3px solid #e9d5ff;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      overflow: hidden; /* Para recortar la imagen al tamaño del contenedor */
+      overflow: hidden;
+      /* Para recortar la imagen al tamaño del contenedor */
       display: flex;
       align-items: center;
       justify-content: center;
@@ -219,7 +222,8 @@
     .large-avatar img {
       width: 100%;
       height: 100%;
-      object-fit: cover; /* Para mantener la proporción de la imagen */
+      object-fit: cover;
+      /* Para mantener la proporción de la imagen */
     }
 
     .dashboard-grid {
@@ -394,6 +398,9 @@
             <li class="list-group-item">
               <strong>Edad:</strong> <span id="edad"></span>
             </li>
+            <li class="list-group-item">
+              <strong>Animal Espiritual:</strong> <span id="animalEspiritual"></span>
+            </li>
           </ul>
         </div>
         <div class="col-md-6">
@@ -492,6 +499,7 @@
       document.getElementById("email").textContent = usuario.email;
       document.getElementById("whatsapp").textContent = usuario.whatsapp;
       document.getElementById("instagram").textContent = usuario.instagram;
+      document.getElementById("animalEspiritual").textContent = usuario.animalEspiritual || "No seleccionado";
 
       // Mostrar saldo con formato
       const saldo = parseFloat(usuario.saldo || 0).toFixed(2);
@@ -513,27 +521,46 @@
       try {
         // Obtener avatares del servidor
         const response = await fetch(`${API_URL}/avatars`);
-        
+
         if (!response.ok) {
           throw new Error('Error al obtener avatares');
         }
-        
+
         // Guardar en variable global para uso posterior
         window.avatarImages = await response.json();
-        
-        // Si el usuario tiene avatarId, mostrar la imagen
-        if (userData && userData.avatarId) {
-          mostrarAvatar(userData.avatarId);
+
+        // Si el usuario tiene animal espiritual, mostrar ese avatar
+        if (userData && userData.animalEspiritual) {
+          mostrarAvatarPorNombre(userData.animalEspiritual);
         }
       } catch (error) {
         console.error('Error al cargar avatares:', error);
       }
     }
 
-    function mostrarAvatar(avatarId) {
-      // Buscar el avatar seleccionado
-      const avatar = window.avatarImages.find(img => img.id === avatarId);
-      
+    function mostrarAvatarPorNombre(nombreAnimal) {
+      if (!window.avatarImages || !nombreAnimal) return;
+
+      // Normalizar el nombre del animal (quitar acentos, convertir a minúsculas, quitar espacios)
+      const nombreFormateado = nombreAnimal.toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Quitar acentos
+        .replace(/\s+/g, ''); // Quitar espacios
+
+      // Buscar el avatar por nombre
+      const avatar = window.avatarImages.find(img => {
+        // Extraer nombre del archivo
+        const urlParts = img.url.split('/');
+        const fileName = urlParts[urlParts.length - 1]; // Obtener última parte de la URL
+
+        // Normalizar nombre del archivo de la misma manera
+        const fileNameNormalized = fileName.split('.')[0].toLowerCase()
+          .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+          .replace(/[_-]/g, '')
+          .replace(/\s+/g, '');
+
+        return fileNameNormalized === nombreFormateado;
+      });
+
       if (avatar) {
         // Reemplazar los iconos de usuario por la imagen en todos los lugares necesarios
         const avatarContainers = [
@@ -541,12 +568,12 @@
           document.getElementById('navProfileAvatar'), // Avatar en navbar
           document.getElementById('dropdownProfileAvatar') // Avatar en dropdown
         ];
-        
+
         avatarContainers.forEach(container => {
           if (container) {
             // Limpiar el contenedor
             container.innerHTML = '';
-            
+
             // Crear y añadir la imagen
             const img = document.createElement('img');
             img.src = avatar.url;
