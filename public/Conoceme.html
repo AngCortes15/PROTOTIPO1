@@ -1,0 +1,1342 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conoce.me - Tantuyo Centro Cultural</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .main-container {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #e9d5ff 0%, #6b21a8 100%);
+      padding-bottom: 50px;
+    }
+
+    .navbar {
+      background: white;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+      padding: 0.8rem 2rem;
+    }
+
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: transform 0.2s;
+    }
+
+    .navbar-brand:hover {
+      transform: scale(1.02);
+    }
+
+    .brand-logo {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      object-fit: cover;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
+
+    .brand-name {
+      font-weight: 700;
+      font-size: 1.3rem;
+      color: #4a2d8b;
+      margin: 0;
+    }
+
+    .brand-tagline {
+      font-size: 0.8rem;
+      color: #6b7280;
+      margin: 0;
+    }
+
+    .back-button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background-color: #f3f4f6;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 20px;
+      color: #4b5563;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .back-button:hover {
+      background-color: #e5e7eb;
+      transform: translateX(-2px);
+    }
+
+    /* Estilos específicos para Conoce.me */
+    .content-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* Contenedor scrolleable para preguntas */
+    .questions-scroll-container {
+      max-height: 500px;
+      overflow-y: auto;
+      padding-right: 10px;
+    }
+
+    /* Scrollbar personalizada */
+    .questions-scroll-container::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .questions-scroll-container::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+
+    .questions-scroll-container::-webkit-scrollbar-thumb {
+      background: #4a2d8b;
+      border-radius: 10px;
+    }
+
+    .questions-scroll-container::-webkit-scrollbar-thumb:hover {
+      background: #3c2372;
+    }
+
+    .tab-container {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      background-color: white;
+      border-radius: 15px;
+      padding: 5px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 12px;
+      cursor: pointer;
+      border-radius: 10px;
+      font-weight: 600;
+      color: #666;
+      transition: all 0.3s ease;
+    }
+
+    .tab.active {
+      background-color: #4a2d8b;
+      color: white;
+    }
+
+    .content-card {
+      background-color: white;
+      border-radius: 15px;
+      padding: 30px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      display: none;
+    }
+
+    .content-card.active {
+      display: block;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #eee;
+    }
+
+    h2 {
+      color: #4a2d8b;
+      font-size: 24px;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .description {
+      color: #666;
+      font-size: 15px;
+      margin-bottom: 25px;
+      line-height: 1.6;
+    }
+
+    .question-item {
+      margin-bottom: 30px;
+    }
+
+    .question {
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: #4a2d8b;
+      font-size: 16px;
+    }
+
+    .answer {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 10px;
+      font-size: 14px;
+      min-height: 60px;
+      color: #333;
+      border: 2px solid #e9d5ff;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .answer:hover {
+      border-color: #4a2d8b;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .empty-answer {
+      color: #999;
+      font-style: italic;
+    }
+
+    .save-button {
+      background-color: #4a2d8b;
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 25px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin: 30px auto;
+      display: block;
+      font-size: 16px;
+    }
+
+    .save-button:hover {
+      background-color: #6b21a8;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .vcard-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 20px;
+      margin-top: 25px;
+      margin-bottom: 25px;
+    }
+
+    .vcard {
+      background-color: #f8f9fa;
+      border-radius: 15px;
+      padding: 20px;
+      text-align: center;
+      min-height: 150px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-size: 14px;
+      line-height: 1.4;
+      border: 2px solid #e9d5ff;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .vcard:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+      border-color: #4a2d8b;
+    }
+
+    .vcard i {
+      font-size: 30px;
+      margin-bottom: 10px;
+      color: #4a2d8b;
+    }
+
+    .vcard .remove-btn {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: none;
+      border: none;
+      color: #dc3545;
+      cursor: pointer;
+      font-size: 16px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .vcard:hover .remove-btn {
+      opacity: 1;
+    }
+
+    .add-vcard-btn {
+      background-color: #4a2d8b;
+      color: white;
+      border: none;
+      padding: 60px;
+      border-radius: 15px;
+      font-size: 40px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      border: 2px dashed #4a2d8b;
+      background-color: transparent;
+      color: #4a2d8b;
+      min-height: 150px;
+    }
+
+    .add-vcard-btn:hover {
+      background-color: #f8f9fa;
+      transform: scale(1.05);
+    }
+
+    .passion-container {
+      margin-top: 25px;
+    }
+
+    .passion-item {
+      display: flex;
+      align-items: center;
+      background-color: #f8f9fa;
+      padding: 15px 20px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      border: 2px solid #e9d5ff;
+      transition: all 0.3s ease;
+      cursor: grab;
+    }
+
+    .passion-item:hover {
+      transform: translateX(5px);
+      border-color: #4a2d8b;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .passion-item.sortable-drag {
+      cursor: grabbing;
+      opacity: 0.5;
+    }
+
+    .passion-number {
+      background-color: #4a2d8b;
+      color: white;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 600;
+      margin-right: 15px;
+      flex-shrink: 0;
+    }
+
+    .passion-text {
+      flex-grow: 1;
+      font-weight: 500;
+      color: #333;
+    }
+
+    .passion-remove {
+      color: #dc3545;
+      cursor: pointer;
+      padding: 5px;
+      font-size: 18px;
+      background: none;
+      border: none;
+      transition: color 0.3s;
+    }
+
+    .passion-remove:hover {
+      color: #a02622;
+    }
+
+    .add-passion-btn {
+      background-color: #4a2d8b;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      margin-bottom: 20px;
+    }
+
+    .add-passion-btn:hover {
+      background-color: #6b21a8;
+      transform: translateY(-2px);
+    }
+
+    /* Estilos para búsqueda y categorías de pasiones */
+    .passion-search-container {
+      margin-bottom: 15px;
+    }
+
+    .passion-search-bar {
+      position: relative;
+      margin-bottom: 10px;
+    }
+
+    .passion-search-bar input {
+      padding-left: 40px;
+      border-radius: 20px;
+      border: 1px solid #ced4da;
+      padding: 8px 15px 8px 40px;
+      width: 100%;
+    }
+
+    .passion-search-bar i {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6c757d;
+    }
+
+    .passion-categories {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+
+    .passion-modal-category {
+      background-color: #f0f0f0;
+      border-radius: 20px;
+      padding: 5px 15px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .passion-modal-category:hover {
+      background-color: #e0e0e0;
+    }
+
+    .passion-modal-category.active {
+      background-color: #4a2d8b;
+      color: white;
+    }
+
+    .passion-selector {
+      max-height: 400px;
+      overflow-y: auto;
+      padding: 10px;
+    }
+
+    .passion-option {
+      padding: 10px 15px;
+      border: 2px solid #e9d5ff;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .passion-option:hover {
+      border-color: #4a2d8b;
+      background-color: #f8f9fa;
+    }
+
+    .passion-option-name {
+      font-weight: 500;
+    }
+
+    .passion-category-badge {
+      font-size: 12px;
+      color: #666;
+      background-color: #e9d5ff;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+      background-color: white;
+      margin: 5% auto;
+      padding: 30px;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 600px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #eee;
+    }
+
+    .modal-title {
+      color: #4a2d8b;
+      font-size: 20px;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #666;
+    }
+
+    .modal-close:hover {
+      color: #333;
+    }
+
+    .icon-selector {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+      gap: 10px;
+      margin: 20px 0;
+      max-height: 300px;
+      overflow-y: auto;
+      padding: 10px;
+    }
+
+    .icon-option {
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #e9d5ff;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 24px;
+      transition: all 0.2s;
+    }
+
+    .icon-option:hover {
+      border-color: #4a2d8b;
+      background-color: #f8f9fa;
+    }
+
+    .icon-option.selected {
+      border-color: #4a2d8b;
+      background-color: #e9d5ff;
+    }
+
+    .modal-input {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #e9d5ff;
+      border-radius: 8px;
+      font-size: 16px;
+      margin: 10px 0;
+    }
+
+    .modal-input:focus {
+      outline: none;
+      border-color: #4a2d8b;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .modal-btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .modal-btn.save {
+      background-color: #4a2d8b;
+      color: white;
+    }
+
+    .modal-btn.save:hover {
+      background-color: #6b21a8;
+    }
+
+    .modal-btn.cancel {
+      background-color: #e9ecef;
+      color: #333;
+    }
+
+    .modal-btn.cancel:hover {
+      background-color: #ddd;
+    }
+
+    .passion-selector {
+      max-height: 400px;
+      overflow-y: auto;
+      padding: 10px;
+    }
+
+    .passion-option {
+      padding: 10px 15px;
+      border: 2px solid #e9d5ff;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .passion-option:hover {
+      border-color: #4a2d8b;
+      background-color: #f8f9fa;
+    }
+
+    .passion-category {
+      font-size: 12px;
+      color: #666;
+      background-color: #e9d5ff;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+
+    .alert {
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      display: none;
+    }
+
+    .alert.success {
+      background-color: #d1e7dd;
+      color: #0f5132;
+      border: 1px solid #badbcc;
+    }
+
+    .alert.error {
+      background-color: #f8d7da;
+      color: #842029;
+      border: 1px solid #f5c2c7;
+    }
+
+    /* Media queries */
+    @media (max-width: 768px) {
+      .navbar {
+        padding: 0.8rem 1rem;
+      }
+
+      .content-container {
+        padding: 15px;
+      }
+
+      .vcard-container {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 15px;
+      }
+
+      .tab-container {
+        flex-direction: column;
+      }
+
+      .tab {
+        margin-bottom: 5px;
+      }
+
+      .back-button span {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="main-container">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="dashboard.html">
+          <img
+            src="https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F883171863%2F207532730700%2F1%2Foriginal.20241025-055049?w=512&auto=format%2Ccompress&q=75&sharp=10&rect=74%2C4%2C632%2C632&s=5e6a99698de97f7a0c5f18256bcfd582"
+            alt="Logo Tantuyo" class="brand-logo">
+          <div class="brand-text">
+            <span class="brand-name">Tantuyo</span>
+            <span class="brand-tagline">Centro Cultural</span>
+          </div>
+        </a>
+        <a href="dashboard.html" class="back-button">
+          <i class="fas fa-arrow-left"></i>
+          <span>Volver a Eventos</span>
+        </a>
+      </div>
+    </nav>
+
+    <div class="content-container">
+      <!-- Alert para mensajes -->
+      <div id="alertMessage" class="alert"></div>
+      
+      <div class="tab-container">
+        <div class="tab active" onclick="showTab('preguntas')">Preguntas</div>
+        <div class="tab" onclick="showTab('vcards')">VCards</div>
+        <div class="tab" onclick="showTab('pasiones')">Pasiones</div>
+      </div>
+      
+      <!-- Sección de Preguntas -->
+      <div id="preguntas" class="content-card active">
+        <div class="card-header">
+          <h2>Conoce.me</h2>
+        </div>
+        
+        <div class="description">
+          Comparte tus respuestas a estas preguntas para que los demás puedan conocerte mejor. Puedes responder hasta 10 preguntas.
+        </div>
+        
+        <div class="questions-scroll-container" id="preguntasContainer">
+          <!-- Las preguntas se cargarán dinámicamente -->
+        </div>
+      </div>
+      
+      <!-- Sección de VCards -->
+      <div id="vcards" class="content-card">
+        <div class="card-header">
+          <h2>VCards</h2>
+        </div>
+        
+        <div class="description">
+          Coloca todas esas ideas en las que eres virgen (no sexuales) y que te gustaría hacer con alguien. Comparte experiencias que te gustaría vivir con alguien más. Puedes agregar hasta 10 VCards.
+        </div>
+        
+        <div class="vcard-container" id="vcardsContainer">
+          <!-- VCards se cargarán dinámicamente -->
+        </div>
+      </div>
+      
+      <!-- Sección de Pasiones -->
+      <div id="pasiones" class="content-card">
+        <div class="card-header">
+          <h2>Mis Pasiones</h2>
+        </div>
+        
+        <div class="description">
+          Selecciona hasta 10 pasiones y organízalas por orden de importancia.
+        </div>
+        
+        <button class="add-passion-btn" onclick="openPassionModal()">
+          <i class="fas fa-plus"></i> Agregar Pasión
+        </button>
+        
+        <div class="passion-container" id="pasionesContainer">
+          <!-- Pasiones se cargarán dinámicamente -->
+        </div>
+      </div>
+      
+      <!-- Botón Guardar Datos -->
+      <button class="save-button" onclick="guardarDatos()">
+        <i class="fas fa-save"></i> Guardar Todos los Datos
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal para VCards -->
+  <div id="vcardModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Agregar VCard</h3>
+        <button class="modal-close" onclick="closeVcardModal()">&times;</button>
+      </div>
+      
+      <div>
+        <label style="font-weight: 600; color: #4a2d8b;">Selecciona un ícono (opcional):</label>
+        <div class="icon-selector" id="iconSelector">
+          <!-- Iconos se generarán dinámicamente -->
+        </div>
+        
+        <label style="font-weight: 600; color: #4a2d8b;">Escribe tu experiencia:</label>
+        <textarea class="modal-input" id="vcardText" rows="3" placeholder="Describe tu experiencia..." maxlength="100"></textarea>
+        
+        <div class="modal-actions">
+          <button class="modal-btn cancel" onclick="closeVcardModal()">Cancelar</button>
+          <button class="modal-btn save" onclick="saveVcard()">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para Pasiones -->
+  <div id="passionModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Seleccionar Pasión</h3>
+        <button class="modal-close" onclick="closePassionModal()">&times;</button>
+      </div>
+      
+      <div class="passion-search-container">
+        <div class="passion-search-bar">
+          <i class="fas fa-search"></i>
+          <input type="text" id="passionSearchInput" placeholder="Buscar pasión...">
+        </div>
+        <div class="passion-categories" id="passionCategories">
+          <!-- Las categorías se generarán dinámicamente -->
+        </div>
+      </div>
+      
+      <div class="passion-selector" id="passionSelector">
+        <!-- Opciones de pasiones se generarán dinámicamente -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para editar preguntas -->
+  <div id="questionModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="questionTitle"></h3>
+        <button class="modal-close" onclick="closeQuestionModal()">&times;</button>
+      </div>
+      
+      <div>
+        <textarea class="modal-input" id="questionAnswer" rows="4" placeholder="Escribe tu respuesta..." maxlength="300"></textarea>
+        
+        <div class="modal-actions">
+          <button class="modal-btn cancel" onclick="closeQuestionModal()">Cancelar</button>
+          <button class="modal-btn save" onclick="saveQuestion()">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/config.js"></script>
+  <script>
+    const API_URL = config.API_URL;
+    let userData = null;
+    let userConoceme = {
+      preguntas: {},
+      vcards: [],
+      pasiones: []
+    };
+    let currentQuestionIndex = null;
+    let selectedIcon = null;
+
+    // Preguntas predefinidas
+    const preguntasPredefinidas = [
+      "Mi mayor pasión es:",
+      "Mi mayor talento es:",
+      "Mi propósito para este año es:",
+      "La persona que más admiro es:",
+      "El libro que más ha cambiado mi vida es:",
+      "Mi película favorita es:",
+      "Si pudiera viajar a cualquier lugar del mundo, iría a:",
+      "Mi mayor sueño es:",
+      "Lo que más valoro en una amistad es:",
+      "Mi superpoder deseado sería:"
+    ];
+
+    // Lista de pasiones
+    const listaPasiones = {
+      "Futból": "Deporte",
+      "Formula 1": "Deporte",
+      "Pintura": "Artes Visuales",
+      "Fotografía": "Audiovisuales",
+      "Escuchar Música": "Musicales",
+      "Cocinar": "Gastronomía",
+      "Bailar": "Artes Escénicas",
+      "Actuación": "Artes Escénicas",
+      "Escribir": "Literatura",
+      "Viajar": "Viajes",
+      "Leer": "Literatura",
+      "Dibujar": "Artes Visuales",
+      "Cantar": "Musicales",
+      "Hacer Películas": "Audiovisuales",
+      "Diseño de Moda": "Diseño",
+      "Bloguear / Blog": "Comunicación",
+      "Programar": "Tecnología",
+      "Jardinería": "Naturaleza",
+      "Surf": "Deporte",
+      "Escalada": "Deporte",
+      "Buceo": "Deporte",
+      "Yoga": "Wellness",
+      "Meditar": "Wellness",
+      "Correr": "Deporte",
+      "Ciclismo": "Deporte",
+      "Natación": "Deporte",
+      "Senderismo (Hiking)": "Naturaleza",
+      "Campismo (Acampar)": "Naturaleza",
+      "Pesca": "Recreación",
+      "Esquí": "Deporte",
+      "Snowboarding": "Deporte",
+      "Boxeo": "Deporte",
+      "Artes Marciales": "Deporte",
+      "Ajedrez": "Juegos",
+      "Youtuber / Streaming": "Entretenimiento",
+      "Observación de Aves": "Naturaleza",
+      "Voluntariado": "Social",
+      "Activismo Ambiental": "Activismo",
+      "Inversiones": "Finanzas",
+      "Emprendimiento": "Empresariales",
+      "Inmobiliaria": "Finanzas",
+      "Educar / Aprender": "Educación",
+      "Psicología": "Ciencias Sociales",
+      "Astronomía": "Ciencia",
+      "Historia": "Historia",
+      "Idiomas Extranjeros": "Idiomas",
+      "Culturas del Mundo": "Cultura",
+      "Vino y Cata": "Gastronomía",
+      "Café": "Gastronomía",
+      "Té": "Gastronomía",
+      "Repostería / Postres": "Gastronomía",
+      "Cine": "Entretenimiento",
+      "Poesía": "Literatura",
+      "Teatro": "Artes Escénicas",
+      "Television": "Entretenimiento",
+      "Videojuegos / Gaming": "Hobbies",
+      "Conciertos": "Musicales"
+    };
+
+    // Lista de íconos disponibles para VCards
+    const iconosDisponibles = [
+      'fa-heart', 'fa-star', 'fa-plane', 'fa-camera', 'fa-music',
+      'fa-book', 'fa-coffee', 'fa-bicycle', 'fa-gamepad', 'fa-film',
+      'fa-paint-brush', 'fa-microphone', 'fa-guitar', 'fa-headphones', 'fa-globe',
+      'fa-map', 'fa-compass', 'fa-mountain', 'fa-tree', 'fa-sun',
+      'fa-moon', 'fa-cloud', 'fa-fire', 'fa-water', 'fa-snowflake',
+      'fa-umbrella', 'fa-gift', 'fa-trophy', 'fa-flag', 'fa-lightbulb',
+      'fa-brain', 'fa-graduation-cap', 'fa-briefcase', 'fa-rocket', 'fa-magic',
+      'fa-palette', 'fa-theater-masks', 'fa-dice', 'fa-chess', 'fa-puzzle-piece',
+      'fa-basketball-ball', 'fa-football-ball', 'fa-baseball-ball', 'fa-volleyball-ball', 'fa-table-tennis',
+      'fa-dumbbell', 'fa-running', 'fa-swimming', 'fa-skating', 'fa-skiing'
+    ];
+
+    // Función para cambiar de pestaña
+    function showTab(tabName) {
+      // Desactivar todas las pestañas
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.content-card').forEach(card => card.classList.remove('active'));
+      
+      // Activar la pestaña seleccionada
+      event.target.classList.add('active');
+      document.getElementById(tabName).classList.add('active');
+    }
+
+    // Funciones para las preguntas
+    function renderPreguntas() {
+      const container = document.getElementById('preguntasContainer');
+      container.innerHTML = '';
+      
+      preguntasPredefinidas.forEach((pregunta, index) => {
+        const respuesta = userConoceme.preguntas[index] || '';
+        const div = document.createElement('div');
+        div.className = 'question-item';
+        div.innerHTML = `
+          <div class="question">${index + 1}. ${pregunta}</div>
+          <div class="answer ${!respuesta ? 'empty-answer' : ''}" onclick="openQuestionModal(${index})">
+            ${respuesta || 'Toca para responder...'}
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function openQuestionModal(index) {
+      currentQuestionIndex = index;
+      document.getElementById('questionTitle').textContent = preguntasPredefinidas[index];
+      document.getElementById('questionAnswer').value = userConoceme.preguntas[index] || '';
+      document.getElementById('questionModal').style.display = 'block';
+    }
+
+    function closeQuestionModal() {
+      document.getElementById('questionModal').style.display = 'none';
+      currentQuestionIndex = null;
+    }
+
+    function saveQuestion() {
+      const answer = document.getElementById('questionAnswer').value.trim();
+      if (answer) {
+        userConoceme.preguntas[currentQuestionIndex] = answer;
+        renderPreguntas();
+      }
+      closeQuestionModal();
+    }
+
+    // Funciones para VCards
+    function renderVcards() {
+      const container = document.getElementById('vcardsContainer');
+      container.innerHTML = '';
+      
+      // Mostrar VCards existentes
+      userConoceme.vcards.forEach((vcard, index) => {
+        const div = document.createElement('div');
+        div.className = 'vcard';
+        div.innerHTML = `
+          ${vcard.icon ? `<i class="fas ${vcard.icon}"></i>` : ''}
+          <span>${vcard.text}</span>
+          <button class="remove-btn" onclick="removeVcard(${index})">
+            <i class="fas fa-times"></i>
+          </button>
+        `;
+        container.appendChild(div);
+      });
+      
+      // Agregar botón para nueva VCard si hay menos de 10
+      if (userConoceme.vcards.length < 10) {
+        const addButton = document.createElement('div');
+        addButton.className = 'add-vcard-btn';
+        addButton.onclick = openVcardModal;
+        addButton.innerHTML = '<i class="fas fa-plus"></i>';
+        container.appendChild(addButton);
+      }
+    }
+
+    function openVcardModal() {
+      if (userConoceme.vcards.length >= 10) {
+        showAlert('error', 'Has alcanzado el límite máximo de 10 VCards');
+        return;
+      }
+      selectedIcon = null;
+      document.getElementById('vcardText').value = '';
+      renderIconSelector();
+      document.getElementById('vcardModal').style.display = 'block';
+    }
+
+    function closeVcardModal() {
+      document.getElementById('vcardModal').style.display = 'none';
+      selectedIcon = null;
+    }
+
+    function renderIconSelector() {
+      const selector = document.getElementById('iconSelector');
+      selector.innerHTML = '';
+      
+      iconosDisponibles.forEach(icon => {
+        const div = document.createElement('div');
+        div.className = 'icon-option';
+        div.onclick = () => selectIcon(icon);
+        div.innerHTML = `<i class="fas ${icon}"></i>`;
+        selector.appendChild(div);
+      });
+    }
+
+    function selectIcon(icon) {
+      selectedIcon = icon;
+      document.querySelectorAll('.icon-option').forEach(el => el.classList.remove('selected'));
+      event.target.closest('.icon-option').classList.add('selected');
+    }
+
+    function saveVcard() {
+      const text = document.getElementById('vcardText').value.trim();
+      if (!text) {
+        showAlert('error', 'Por favor escribe una experiencia');
+        return;
+      }
+      
+      userConoceme.vcards.push({
+        icon: selectedIcon,
+        text: text
+      });
+      
+      renderVcards();
+      closeVcardModal();
+    }
+
+    function removeVcard(index) {
+      userConoceme.vcards.splice(index, 1);
+      renderVcards();
+    }
+
+    // Funciones para Pasiones
+    function renderPasiones() {
+      const container = document.getElementById('pasionesContainer');
+      container.innerHTML = '';
+      
+      userConoceme.pasiones.forEach((pasion, index) => {
+        const div = document.createElement('div');
+        div.className = 'passion-item';
+        div.innerHTML = `
+          <div class="passion-number">${index + 1}</div>
+          <div class="passion-text">${pasion}</div>
+          <button class="passion-remove" onclick="removePassion(${index})">
+            <i class="fas fa-times"></i>
+          </button>
+        `;
+        container.appendChild(div);
+      });
+      
+      // Inicializar Sortable
+      if (userConoceme.pasiones.length > 0) {
+        new Sortable(container, {
+          animation: 150,
+          ghostClass: 'sortable-ghost',
+          onEnd: function(evt) {
+            const item = userConoceme.pasiones.splice(evt.oldIndex, 1)[0];
+            userConoceme.pasiones.splice(evt.newIndex, 0, item);
+            renderPasiones();
+          }
+        });
+      }
+    }
+
+    function openPassionModal() {
+      if (userConoceme.pasiones.length >= 10) {
+        showAlert('error', 'Has alcanzado el límite máximo de 10 pasiones');
+        return;
+      }
+      renderPassionCategories();
+      renderPassionSelector();
+      configurarBusquedaPasiones();
+      document.getElementById('passionModal').style.display = 'block';
+    }
+
+    function closePassionModal() {
+      document.getElementById('passionModal').style.display = 'none';
+    }
+
+    function renderPassionCategories() {
+      const categoriesContainer = document.getElementById('passionCategories');
+      categoriesContainer.innerHTML = '';
+
+      // Añadir categoría "Todos"
+      const allCategory = document.createElement('div');
+      allCategory.className = 'passion-modal-category active';
+      allCategory.dataset.category = 'all';
+      allCategory.textContent = 'Todos';
+      categoriesContainer.appendChild(allCategory);
+
+      // Obtener categorías únicas
+      const uniqueCategories = [...new Set(Object.values(listaPasiones))];
+      
+      uniqueCategories.forEach(category => {
+        const categoryElement = document.createElement('div');
+        categoryElement.className = 'passion-modal-category';
+        categoryElement.dataset.category = category;
+        categoryElement.textContent = category;
+        categoriesContainer.appendChild(categoryElement);
+      });
+
+      // Añadir eventos click a las categorías
+      document.querySelectorAll('.passion-modal-category').forEach(category => {
+        category.addEventListener('click', function() {
+          // Quitar clase active de todas las categorías
+          document.querySelectorAll('.passion-modal-category').forEach(cat => {
+            cat.classList.remove('active');
+          });
+          
+          // Añadir clase active a la categoría clickeada
+          this.classList.add('active');
+          
+          // Filtrar pasiones por categoría
+          const selectedCategory = this.dataset.category;
+          filterPassionsByCategory(selectedCategory);
+        });
+      });
+    }
+
+    function filterPassionsByCategory(category) {
+      const searchTerm = document.getElementById('passionSearchInput').value.toLowerCase();
+      let filteredPassions;
+      
+      if (category === 'all') {
+        filteredPassions = Object.entries(listaPasiones);
+      } else {
+        filteredPassions = Object.entries(listaPasiones).filter(([pasion, cat]) => cat === category);
+      }
+      
+      // Aplicar también el filtro de búsqueda si existe
+      if (searchTerm) {
+        filteredPassions = filteredPassions.filter(([pasion, cat]) => 
+          pasion.toLowerCase().includes(searchTerm)
+        );
+      }
+      
+      renderFilteredPassions(filteredPassions);
+    }
+
+    function configurarBusquedaPasiones() {
+      const searchInput = document.getElementById('passionSearchInput');
+      
+      searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        
+        // Obtener la categoría actualmente seleccionada
+        const activeCategory = document.querySelector('.passion-modal-category.active').dataset.category;
+        
+        filterPassionsByCategory(activeCategory);
+      });
+    }
+
+    function renderFilteredPassions(passions) {
+      const selector = document.getElementById('passionSelector');
+      selector.innerHTML = '';
+      
+      if (passions.length === 0) {
+        const noResults = document.createElement('div');
+        noResults.className = 'text-center p-4';
+        noResults.innerHTML = '<i class="fas fa-search fa-2x mb-2 text-muted"></i><p>No se encontraron resultados</p>';
+        selector.appendChild(noResults);
+        return;
+      }
+      
+      passions.forEach(([pasion, categoria]) => {
+        // Solo mostrar pasiones que no estén ya seleccionadas
+        if (!userConoceme.pasiones.includes(pasion)) {
+          const div = document.createElement('div');
+          div.className = 'passion-option';
+          div.onclick = () => selectPassion(pasion);
+          div.innerHTML = `
+            <span class="passion-option-name">${pasion}</span>
+            <span class="passion-category-badge">${categoria}</span>
+          `;
+          selector.appendChild(div);
+        }
+      });
+    }
+
+    function renderPassionSelector() {
+      const selector = document.getElementById('passionSelector');
+      selector.innerHTML = '';
+      
+      renderFilteredPassions(Object.entries(listaPasiones));
+    }
+
+    function selectPassion(pasion) {
+      userConoceme.pasiones.push(pasion);
+      renderPasiones();
+      closePassionModal();
+    }
+
+    function removePassion(index) {
+      userConoceme.pasiones.splice(index, 1);
+      renderPasiones();
+    }
+
+    // Función para mostrar alertas
+    function showAlert(type, message) {
+      const alert = document.getElementById('alertMessage');
+      alert.className = `alert ${type}`;
+      alert.textContent = message;
+      alert.style.display = 'block';
+      
+      setTimeout(() => {
+        alert.style.display = 'none';
+      }, 3000);
+    }
+
+    // Función principal para guardar todos los datos
+    async function guardarDatos() {
+      try {
+        const userId = localStorage.getItem("userId");
+        if (!userId) {
+          showAlert('error', 'No se encontró información del usuario');
+          return;
+        }
+
+        // Preparar los datos para guardar
+        const conocemeData = {
+          preguntas: userConoceme.preguntas,
+          vcards: userConoceme.vcards,
+          pasiones: userConoceme.pasiones
+        };
+
+        const response = await fetch(`${API_URL}/users/${userId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ conoceme: conocemeData })
+        });
+
+        if (!response.ok) {
+          throw new Error('Error al guardar los datos');
+        }
+
+        showAlert('success', 'Todos los datos se han guardado correctamente');
+      } catch (error) {
+        console.error('Error al guardar datos:', error);
+        showAlert('error', 'Error al guardar los datos');
+      }
+    }
+
+    // Función para cargar datos del usuario
+    async function cargarDatosUsuario() {
+      try {
+        const userId = localStorage.getItem("userId");
+        if (!userId) {
+          window.location.href = "login.html";
+          return;
+        }
+
+        const response = await fetch(`${API_URL}/users/${userId}`);
+        if (!response.ok) {
+          throw new Error("Usuario no encontrado");
+        }
+
+        userData = await response.json();
+        
+        // Cargar datos de conoceme si existen
+        if (userData.conoceme) {
+          userConoceme = {
+            preguntas: userData.conoceme.preguntas || {},
+            vcards: userData.conoceme.vcards || [],
+            pasiones: userData.conoceme.pasiones || []
+          };
+        }
+        
+        // Renderizar todas las secciones
+        renderPreguntas();
+        renderVcards();
+        renderPasiones();
+      } catch (error) {
+        console.error("Error al cargar datos:", error);
+        showAlert('error', 'Error al cargar los datos del usuario');
+      }
+    }
+
+    // Inicializar la página
+    document.addEventListener('DOMContentLoaded', function() {
+      cargarDatosUsuario();
+    });
+
+    // Event listeners para cerrar modales al hacer clic fuera
+    window.onclick = function(event) {
+      if (event.target.classList.contains('modal')) {
+        event.target.style.display = 'none';
+      }
+    }
+  </script>
+</body>
+</html>

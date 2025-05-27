@@ -262,6 +262,14 @@
       color: #4a2d8b;
     }
 
+    /* Estilo específico para la imagen del módulo Conoce.me */
+    .dashboard-card .conoceme-logo {
+      width: 40px;
+      height: 40px;
+      margin-bottom: 0.75rem;
+      object-fit: contain;
+    }
+
     .dashboard-card h3 {
       margin-bottom: 0.5rem;
       color: #333;
@@ -306,6 +314,10 @@
 
       .balance-display {
         margin-right: 0;
+      }
+
+      .dashboard-grid {
+        grid-template-columns: repeat(2, 1fr);
       }
     }
   </style>
@@ -427,20 +439,15 @@
         <h3>Eventos</h3>
         <p>Gestiona tus eventos</p>
       </a>
-      <a href="#pasiones" class="dashboard-card">
-        <i class="fas fa-heart"></i>
-        <h3>Pasiones</h3>
-        <p>Explora tus intereses</p>
+      <a href="Conoceme.html" class="dashboard-card">
+        <img src="images/conoceme/conoceme_logo.png" alt="Conoce.me" class="conoceme-logo">
+        <h3>Conoce.me</h3>
+        <p>Descubre nuevas conexiones</p>
       </a>
       <a href="MisOrdenes.html" class="dashboard-card">
         <i class="fas fa-coffee"></i>
         <h3>Mis Ordenes</h3>
         <p>¿Ya te entregaron tu pedido?</p>
-      </a>
-      <a href="#vcards" class="dashboard-card">
-        <i class="fas fa-address-card"></i>
-        <h3>VCards</h3>
-        <p>Gestiona tus tarjetas</p>
       </a>
       <a href="#configuracion" class="dashboard-card">
         <i class="fas fa-cog"></i>
